@@ -11,6 +11,7 @@ abstract final class RoutePaths {
   static const String invitationAccept = '/invitations/accept';
   static const String dashboard = '/dashboard';
   static const String members = '/members';
+  static const String membersCreate = '/members/create';
   static const String checkIn = '/check-in';
   static const String attendance = '/attendance';
   static const String subscriptions = '/subscriptions';
@@ -21,4 +22,10 @@ abstract final class RoutePaths {
   static const String branches = '/branches';
   static const String settings = '/settings';
   static const String profile = '/profile';
+
+  /// Route for a member detail page, e.g. `/members/abc-123`.
+  static String memberDetail(String id) => '/members/$id';
+
+  /// Route for the edit page of a member, e.g. `/members/abc-123/edit`.
+  static String memberEdit(String id) => '/members/$id/edit';
 }
