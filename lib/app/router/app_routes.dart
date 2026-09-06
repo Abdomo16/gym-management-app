@@ -28,4 +28,9 @@ abstract final class RoutePaths {
 
   /// Route for the edit page of a member, e.g. `/members/abc-123/edit`.
   static String memberEdit(String id) => '/members/$id/edit';
+
+  /// Route to create/renew a subscription for a member,
+  /// e.g. `/members/abc-123/subscriptions/new`.
+  static String memberSubscriptionCreate(String id) =>
+      '/members/$id/subscriptions/new';
 }

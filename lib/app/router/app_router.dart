@@ -21,6 +21,7 @@ import 'package:gym_management_app/features/members/presentation/screens/edit_me
 import 'package:gym_management_app/features/members/presentation/screens/member_details_screen.dart';
 import 'package:gym_management_app/features/members/presentation/screens/members_screen.dart';
 import 'package:gym_management_app/features/settings/presentation/screens/settings_screen.dart';
+import 'package:gym_management_app/features/subscriptions/presentation/screens/subscription_form_screen.dart';
 
 /// The single source of truth for navigation.
 ///
@@ -93,6 +94,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/members/:id/edit',
             builder: (context, state) => EditMemberScreen(
+              memberId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: '/members/:id/subscriptions/new',
+            builder: (context, state) => SubscriptionFormScreen(
               memberId: state.pathParameters['id']!,
             ),
           ),
