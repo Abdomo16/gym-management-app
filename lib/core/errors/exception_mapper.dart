@@ -16,7 +16,7 @@ abstract final class ExceptionMapper {
       AppFailure() => error,
       // Auth (gotrue) errors.
       AuthException() => AuthFailure(
-        message: error.message,
+        message: _friendlyAuthMessage(error),
         code: error.code,
         cause: error,
       ),
@@ -36,11 +36,27 @@ abstract final class ExceptionMapper {
       FormatException() => const UnexpectedFailure(
         message: 'The server returned an unexpected response.',
       ),
-      // Anything else: keep the message for debuggability.
+      // Anything else: keep the cause for debuggability but surface a
+      // user-friendly message.
       _ => UnexpectedFailure(
-        message: error.toString(),
+        message: 'Something went wrong. Please try again.',
         cause: error,
       ),
+    };
+  }
+
+  /// Maps known Supabase auth error codes to friendly messages.
+  ///
+  /// Deliberately does not distinguish "email not registered" from "wrong
+  /// password" to avoid account enumeration.
+  static String _friendlyAuthMessage(AuthException error) {
+    return switch (error.code) {
+      'invalid_credentials' => 'Invalid email or password.',
+      'email_not_confirmed' => 'Please verify your email before signing in.',
+      'weak_password' => 'The password is too weak.',
+      'over_request_rate_limit' =>
+        'Too many attempts. Please try again in a moment.',
+      _ => 'Unable to sign in. Please try again.',
     };
   }
 }

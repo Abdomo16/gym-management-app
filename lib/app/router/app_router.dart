@@ -8,21 +8,26 @@ import 'package:gym_management_app/core/widgets/app_error_state.dart';
 import 'package:gym_management_app/core/widgets/app_placeholder_screen.dart';
 import 'package:gym_management_app/core/widgets/app_scaffold.dart';
 import 'package:gym_management_app/core/widgets/app_splash_screen.dart';
-import 'package:gym_management_app/features/auth/domain/entities/app_user.dart';
+import 'package:gym_management_app/features/auth/domain/entities/auth_state.dart';
 import 'package:gym_management_app/features/auth/presentation/providers/auth_providers.dart';
-import 'package:gym_management_app/features/auth/presentation/screens/sign_in_screen.dart';
+import 'package:gym_management_app/features/auth/presentation/screens/account_disabled_screen.dart';
+import 'package:gym_management_app/features/auth/presentation/screens/auth_error_screen.dart';
+import 'package:gym_management_app/features/auth/presentation/screens/invitation_accept_screen.dart';
+import 'package:gym_management_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:gym_management_app/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:gym_management_app/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:gym_management_app/features/settings/presentation/screens/settings_screen.dart';
 
 /// The single source of truth for navigation.
 ///
 /// The router is created once; when the auth state changes, a refresh
-/// listener re-evaluates the redirect so guards react to sign-in/out.
+/// listener re-evaluates the redirect so guards react to sign-in/out,
+/// onboarding and account state transitions.
 final routerProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = ValueNotifier<int>(0);
   ref.onDispose(refreshNotifier.dispose);
 
-  ref.listen<AsyncValue<AppUser?>>(authControllerProvider, (previous, next) {
+  ref.listen<AuthState>(authControllerProvider, (previous, next) {
     refreshNotifier.value++;
   });
 
@@ -39,8 +44,24 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AppSplashScreen(),
       ),
       GoRoute(
-        path: RoutePaths.signIn,
-        builder: (context, state) => const SignInScreen(),
+        path: RoutePaths.login,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.accountDisabled,
+        builder: (context, state) => const AccountDisabledScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.authError,
+        builder: (context, state) => const AuthErrorScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.invitationAccept,
+        builder: (context, state) => const InvitationAcceptScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppScaffold(child: child),

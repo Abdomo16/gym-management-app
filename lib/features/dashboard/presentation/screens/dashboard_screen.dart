@@ -5,7 +5,7 @@ import 'package:gym_management_app/app/theme/app_spacing.dart';
 import 'package:gym_management_app/core/widgets/app_card.dart';
 import 'package:gym_management_app/core/widgets/app_empty_state.dart';
 import 'package:gym_management_app/core/widgets/status_badge.dart';
-import 'package:gym_management_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:gym_management_app/features/auth/presentation/providers/auth_state_provider.dart';
 import 'package:gym_management_app/features/dashboard/presentation/widgets/stat_card.dart';
 
 /// Landing page of the authenticated area.
@@ -18,7 +18,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final user = ref.watch(authControllerProvider).value;
+    final user = ref.watch(currentUserProvider);
 
     final hour = DateTime.now().hour;
     final greeting = hour < 12
@@ -26,7 +26,7 @@ class DashboardScreen extends ConsumerWidget {
         : hour < 18
         ? 'Good afternoon'
         : 'Good evening';
-    final displayName = user?.displayName ?? user?.email ?? 'there';
+    final displayName = user?.fullName ?? user?.email ?? 'there';
 
     final stats = <({String label, IconData icon, String value})>[
       (label: 'Members', icon: Icons.group_outlined, value: '—'),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:gym_management_app/app/router/app_routes.dart';
-import 'package:gym_management_app/features/auth/domain/entities/app_user.dart';
+import 'package:gym_management_app/features/auth/domain/entities/user_profile.dart';
 
 /// A single sidebar destination.
 class AppNavItem {
@@ -66,11 +66,13 @@ const List<AppNavSection> appNavSections = [
       label: 'Employees',
       icon: Icons.badge_outlined,
       path: RoutePaths.employees,
+      allowedRoles: {UserRole.owner, UserRole.manager},
     ),
     AppNavItem(
       label: 'Branches',
       icon: Icons.storefront_outlined,
       path: RoutePaths.branches,
+      allowedRoles: {UserRole.owner, UserRole.manager},
     ),
     AppNavItem(
       label: 'Reports',

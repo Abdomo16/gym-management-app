@@ -18,12 +18,28 @@ void main() {
       expect(failure, isA<NetworkFailure>());
     });
 
-    test('maps Supabase AuthException to AuthFailure', () {
+    test('maps invalid credentials to a friendly message', () {
       final failure = ExceptionMapper.map(
-        AuthException('Invalid login credentials'),
+        const AuthException('Invalid login credentials', code: 'invalid_credentials'),
       );
       expect(failure, isA<AuthFailure>());
-      expect(failure.message, 'Invalid login credentials');
+      expect(failure.message, 'Invalid email or password.');
+    });
+
+    test('maps unconfirmed email to a friendly message', () {
+      final failure = ExceptionMapper.map(
+        const AuthException('Email not confirmed', code: 'email_not_confirmed'),
+      );
+      expect(failure, isA<AuthFailure>());
+      expect(failure.message, 'Please verify your email before signing in.');
+    });
+
+    test('does not leak unknown auth error details', () {
+      final failure = ExceptionMapper.map(
+        const AuthException('some internal detail'),
+      );
+      expect(failure, isA<AuthFailure>());
+      expect(failure.message, 'Unable to sign in. Please try again.');
     });
 
     test('maps PostgrestException to SupabaseFailure', () {
@@ -39,9 +55,10 @@ void main() {
       expect(failure, isA<UnexpectedFailure>());
     });
 
-    test('maps unknown errors to UnexpectedFailure', () {
+    test('maps unknown errors to a friendly UnexpectedFailure', () {
       final failure = ExceptionMapper.map(StateError('boom'));
       expect(failure, isA<UnexpectedFailure>());
+      expect(failure.message, 'Something went wrong. Please try again.');
     });
 
     test('passes AppFailure instances through unchanged', () {

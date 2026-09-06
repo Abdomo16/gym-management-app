@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppUser {
 
- String get id; String get email; String? get displayName; UserRole get role;
+ String get id; String get email; UserProfile get profile;
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $AppUserCopyWith<AppUser> get copyWith => _$AppUserCopyWithImpl<AppUser>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.role, role) || other.role == role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.profile, profile) || other.profile == profile));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,email,displayName,role);
+int get hashCode => Object.hash(runtimeType,id,email,profile);
 
 @override
 String toString() {
-  return 'AppUser(id: $id, email: $email, displayName: $displayName, role: $role)';
+  return 'AppUser(id: $id, email: $email, profile: $profile)';
 }
 
 
@@ -45,11 +45,11 @@ abstract mixin class $AppUserCopyWith<$Res>  {
   factory $AppUserCopyWith(AppUser value, $Res Function(AppUser) _then) = _$AppUserCopyWithImpl;
 @useResult
 $Res call({
- String id, String email, String? displayName, UserRole role
+ String id, String email, UserProfile profile
 });
 
 
-
+$UserProfileCopyWith<$Res> get profile;
 
 }
 /// @nodoc
@@ -62,16 +62,24 @@ class _$AppUserCopyWithImpl<$Res>
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? displayName = freezed,Object? role = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? profile = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
-as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as UserRole,
+as String,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as UserProfile,
   ));
 }
-
+/// Create a copy of AppUser
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserProfileCopyWith<$Res> get profile {
+  
+  return $UserProfileCopyWith<$Res>(_self.profile, (value) {
+    return _then(_self.copyWith(profile: value));
+  });
+}
 }
 
 
@@ -153,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String? displayName,  UserRole role)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  UserProfile profile)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
-return $default(_that.id,_that.email,_that.displayName,_that.role);case _:
+return $default(_that.id,_that.email,_that.profile);case _:
   return orElse();
 
 }
@@ -174,10 +182,10 @@ return $default(_that.id,_that.email,_that.displayName,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String? displayName,  UserRole role)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  UserProfile profile)  $default,) {final _that = this;
 switch (_that) {
 case _AppUser():
-return $default(_that.id,_that.email,_that.displayName,_that.role);case _:
+return $default(_that.id,_that.email,_that.profile);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +202,10 @@ return $default(_that.id,_that.email,_that.displayName,_that.role);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String? displayName,  UserRole role)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  UserProfile profile)?  $default,) {final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
-return $default(_that.id,_that.email,_that.displayName,_that.role);case _:
+return $default(_that.id,_that.email,_that.profile);case _:
   return null;
 
 }
@@ -209,13 +217,12 @@ return $default(_that.id,_that.email,_that.displayName,_that.role);case _:
 
 
 class _AppUser extends AppUser {
-  const _AppUser({required this.id, required this.email, this.displayName, this.role = UserRole.receptionist}): super._();
+  const _AppUser({required this.id, required this.email, required this.profile}): super._();
   
 
 @override final  String id;
 @override final  String email;
-@override final  String? displayName;
-@override@JsonKey() final  UserRole role;
+@override final  UserProfile profile;
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +234,16 @@ _$AppUserCopyWith<_AppUser> get copyWith => __$AppUserCopyWithImpl<_AppUser>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.role, role) || other.role == role));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppUser&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.profile, profile) || other.profile == profile));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,email,displayName,role);
+int get hashCode => Object.hash(runtimeType,id,email,profile);
 
 @override
 String toString() {
-  return 'AppUser(id: $id, email: $email, displayName: $displayName, role: $role)';
+  return 'AppUser(id: $id, email: $email, profile: $profile)';
 }
 
 
@@ -247,11 +254,11 @@ abstract mixin class _$AppUserCopyWith<$Res> implements $AppUserCopyWith<$Res> {
   factory _$AppUserCopyWith(_AppUser value, $Res Function(_AppUser) _then) = __$AppUserCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email, String? displayName, UserRole role
+ String id, String email, UserProfile profile
 });
 
 
-
+@override $UserProfileCopyWith<$Res> get profile;
 
 }
 /// @nodoc
@@ -264,17 +271,25 @@ class __$AppUserCopyWithImpl<$Res>
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? displayName = freezed,Object? role = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? profile = null,}) {
   return _then(_AppUser(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
-as String?,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as UserRole,
+as String,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as UserProfile,
   ));
 }
 
-
+/// Create a copy of AppUser
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$UserProfileCopyWith<$Res> get profile {
+  
+  return $UserProfileCopyWith<$Res>(_self.profile, (value) {
+    return _then(_self.copyWith(profile: value));
+  });
+}
 }
 
 // dart format on
