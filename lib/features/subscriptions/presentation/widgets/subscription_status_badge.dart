@@ -22,6 +22,11 @@ class SubscriptionStatusBadge extends StatelessWidget {
         tone: StatusBadgeTone.success,
         icon: Icons.check_circle_outline,
       ),
+      SubscriptionStatus.expiring => const StatusBadge(
+        label: 'Expiring',
+        tone: StatusBadgeTone.warning,
+        icon: Icons.hourglass_bottom_outlined,
+      ),
       SubscriptionStatus.expired => const StatusBadge(
         label: 'Expired',
         tone: StatusBadgeTone.danger,

@@ -38,6 +38,7 @@ class CurrentSubscriptionCard extends StatelessWidget {
     final status = subscription.displayStatus;
     final showStateActions =
         (status == SubscriptionStatus.active ||
+            status == SubscriptionStatus.expiring ||
             status == SubscriptionStatus.frozen) &&
         (onFreeze != null || onCancel != null);
 
@@ -144,7 +145,10 @@ class _StateActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showFreeze = status == SubscriptionStatus.active && onFreeze != null;
+    final showFreeze =
+        (status == SubscriptionStatus.active ||
+            status == SubscriptionStatus.expiring) &&
+        onFreeze != null;
     final showCancel = status != SubscriptionStatus.cancelled &&
         onCancel != null;
 

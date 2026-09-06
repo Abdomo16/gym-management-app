@@ -112,12 +112,14 @@ class _SubscriptionFormScreenState
               organizationId: organizationId,
               memberId: widget.memberId,
               planId: planId,
+              price: _selectedPlan?.price,
               startDate: _startDate,
             )
           : await controller.createSubscription(
               organizationId: organizationId,
               memberId: widget.memberId,
               planId: planId,
+              price: _selectedPlan?.price,
               startDate: _startDate,
             );
 

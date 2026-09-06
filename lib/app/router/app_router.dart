@@ -8,6 +8,7 @@ import 'package:gym_management_app/core/widgets/app_error_state.dart';
 import 'package:gym_management_app/core/widgets/app_placeholder_screen.dart';
 import 'package:gym_management_app/core/widgets/app_scaffold.dart';
 import 'package:gym_management_app/core/widgets/app_splash_screen.dart';
+import 'package:gym_management_app/features/attendance/presentation/screens/check_in_screen.dart';
 import 'package:gym_management_app/features/auth/domain/entities/auth_state.dart';
 import 'package:gym_management_app/features/auth/presentation/providers/auth_providers.dart';
 import 'package:gym_management_app/features/auth/presentation/screens/account_disabled_screen.dart';
@@ -106,8 +107,9 @@ final routerProvider = Provider<GoRouter>((ref) {
 
           GoRoute(
             path: RoutePaths.checkIn,
-            builder: (context, state) =>
-                const AppPlaceholderScreen(featureName: 'Check-in'),
+            builder: (context, state) => CheckInScreen(
+              initialMemberId: state.uri.queryParameters['memberId'],
+            ),
           ),
           GoRoute(
             path: RoutePaths.attendance,

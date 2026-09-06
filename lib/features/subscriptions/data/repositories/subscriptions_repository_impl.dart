@@ -42,6 +42,7 @@ class SupabaseSubscriptionRepository implements SubscriptionRepository {
     required String organizationId,
     required String memberId,
     required String planId,
+    double? price,
     DateTime? startDate,
   }) async {
     try {
@@ -49,6 +50,7 @@ class SupabaseSubscriptionRepository implements SubscriptionRepository {
         organizationId: organizationId,
         memberId: memberId,
         planId: planId,
+        price: price,
         startDate: startDate,
       );
       return SubscriptionMapper.fromMap(row);

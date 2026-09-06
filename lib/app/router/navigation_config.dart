@@ -39,13 +39,8 @@ const List<AppNavSection> appNavSections = [
     ),
     AppNavItem(
       label: 'Check-in',
-      icon: Icons.qr_code_scanner_outlined,
+      icon: Icons.login_rounded,
       path: RoutePaths.checkIn,
-    ),
-    AppNavItem(
-      label: 'Attendance',
-      icon: Icons.event_available_outlined,
-      path: RoutePaths.attendance,
     ),
     AppNavItem(
       label: 'Members',

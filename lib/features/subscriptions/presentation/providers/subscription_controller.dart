@@ -24,6 +24,7 @@ class SubscriptionController extends Notifier<SubscriptionActionStatus> {
     required String organizationId,
     required String memberId,
     required String planId,
+    double? price,
     DateTime? startDate,
   }) {
     return _run(
@@ -32,6 +33,7 @@ class SubscriptionController extends Notifier<SubscriptionActionStatus> {
         organizationId: organizationId,
         memberId: memberId,
         planId: planId,
+        price: price,
         startDate: startDate,
       ),
     );
@@ -41,6 +43,7 @@ class SubscriptionController extends Notifier<SubscriptionActionStatus> {
     required String organizationId,
     required String memberId,
     required String planId,
+    double? price,
     DateTime? startDate,
   }) {
     return _run(
@@ -49,6 +52,7 @@ class SubscriptionController extends Notifier<SubscriptionActionStatus> {
         organizationId: organizationId,
         memberId: memberId,
         planId: planId,
+        price: price,
         startDate: startDate,
       ),
     );

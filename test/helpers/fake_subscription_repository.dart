@@ -58,6 +58,7 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
     String planId = 'plan-1',
     DateTime? startDate,
     DateTime? endDate,
+    double? price = 500,
     SubscriptionStatus status = SubscriptionStatus.active,
     DateTime? createdAt,
   }) {
@@ -69,6 +70,7 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
       planId: planId,
       startDate: start,
       endDate: endDate ?? start.add(const Duration(days: 30)),
+      price: price,
       status: status,
       createdAt: createdAt,
     );
@@ -99,6 +101,7 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
     required String organizationId,
     required String memberId,
     required String planId,
+    double? price,
     DateTime? startDate,
   }) async {
     if (throwOnCreate) {
@@ -113,6 +116,7 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
       memberId: memberId,
       planId: planId,
       startDate: start,
+      price: price,
       // Calendar-day math (like Postgres date arithmetic): adding 91 days
       // to Sep 6 lands on Dec 6 regardless of DST transitions.
       endDate: DateTime(start.year, start.month, start.day + days),
