@@ -10,6 +10,8 @@ import 'package:gym_management_app/core/widgets/app_card.dart';
 import 'package:gym_management_app/core/widgets/app_dialog.dart';
 import 'package:gym_management_app/core/widgets/app_error_state.dart';
 import 'package:gym_management_app/core/widgets/app_loading.dart';
+import 'package:gym_management_app/features/attendance/presentation/providers/member_attendance_provider.dart';
+import 'package:gym_management_app/features/attendance/presentation/widgets/attendance_history_card.dart';
 import 'package:gym_management_app/features/auth/domain/entities/user_profile.dart';
 import 'package:gym_management_app/features/auth/presentation/providers/auth_state_provider.dart';
 import 'package:gym_management_app/features/members/domain/entities/member.dart';
@@ -186,6 +188,8 @@ class _MemberDetailsBody extends ConsumerWidget {
 
           // Subscriptions (current + history)
           _SubscriptionSection(member: member),
+          const SizedBox(height: AppSpacing.md),
+          _AttendanceSection(memberId: member.id),
         ],
       ),
     );
@@ -264,6 +268,60 @@ class _HeroCard extends StatelessWidget {
   }
 }
 
+class _AttendanceSection extends ConsumerWidget {
+  const _AttendanceSection({required this.memberId});
+
+  final String memberId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final attendanceAsync = ref.watch(memberAttendanceProvider(memberId));
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Attendance',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        attendanceAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+            child: AppLoading(),
+          ),
+          error: (error, _) => AppErrorState(
+            failure: error is AppFailure ? error : null,
+            message: error is AppFailure
+                ? null
+                : 'Could not load attendance history.',
+            onRetry: () =>
+                ref.invalidate(memberAttendanceProvider(memberId)),
+          ),
+          data: (attendance) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              AttendanceHistoryCard(attendance: attendance),
+              const SizedBox(height: AppSpacing.sm),
+              AppButton(
+                label: 'Check In',
+                icon: Icons.login_rounded,
+                onPressed: () => context.push(
+                  '${RoutePaths.checkIn}?memberId=${Uri.encodeComponent(memberId)}',
+                ),
+                expanded: true,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Current subscription + history for the member.
 ///
 /// Frontend role checks only shape the UI (which actions appear); Supabase
@@ -333,7 +391,8 @@ class _SubscriptionSection extends ConsumerWidget {
                   ),
                   onFreeze:
                       canChangeStatus &&
-                          current.status == SubscriptionStatus.active
+                          (current.status == SubscriptionStatus.active ||
+                              current.status == SubscriptionStatus.expiring)
                       ? () => _confirmFreeze(context, ref, current)
                       : null,
                   onCancel:
