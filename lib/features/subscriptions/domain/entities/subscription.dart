@@ -5,7 +5,7 @@ part 'subscription.freezed.dart';
 /// Lifecycle states for a subscription, matching the `status` column in
 /// `public.subscriptions`. The database remains the source of truth for
 /// transitions; this enum only provides safe typed access for the UI.
-enum SubscriptionStatus { active, expired, frozen, cancelled }
+enum SubscriptionStatus { active, expiring, expired, frozen, cancelled }
 
 extension SubscriptionStatusX on SubscriptionStatus {
   /// Maps a database status string to a [SubscriptionStatus].
@@ -25,13 +25,15 @@ extension SubscriptionStatusX on SubscriptionStatus {
   String get label {
     return switch (this) {
       SubscriptionStatus.active => 'Active',
+      SubscriptionStatus.expiring => 'Expiring',
       SubscriptionStatus.expired => 'Expired',
       SubscriptionStatus.frozen => 'Frozen',
       SubscriptionStatus.cancelled => 'Cancelled',
     };
   }
 
-  bool get isActive => this == SubscriptionStatus.active;
+  bool get isActive =>
+      this == SubscriptionStatus.active || this == SubscriptionStatus.expiring;
   bool get isTerminal => this == SubscriptionStatus.expired ||
       this == SubscriptionStatus.cancelled;
 }
@@ -50,6 +52,9 @@ abstract class Subscription with _$Subscription {
     required String planId,
     required DateTime startDate,
     DateTime? endDate,
+    double? price,
+    String? paymentStatus,
+    String? createdBy,
     @Default(SubscriptionStatus.active) SubscriptionStatus status,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -76,15 +81,17 @@ abstract class Subscription with _$Subscription {
   /// This is the value Phase 5 check-in will rely on: the subscription must
   /// be active and the end date not yet passed.
   bool isValid({DateTime? now}) {
-    if (status != SubscriptionStatus.active) {
+    if (!status.isActive) {
       return false;
     }
-    return (remainingDays(now: now) ?? 0) > 0;
+    final today = _dateOnly(now ?? DateTime.now());
+    final startsOnOrBeforeToday = !_dateOnly(startDate).isAfter(today);
+    return startsOnOrBeforeToday && (remainingDays(now: now) ?? 0) > 0;
   }
 
   /// True when the subscription is active and will lapse within 7 days.
   bool isExpiringSoon({DateTime? now}) {
-    if (status != SubscriptionStatus.active) {
+    if (!status.isActive) {
       return false;
     }
     final days = remainingDays(now: now);
@@ -96,7 +103,7 @@ abstract class Subscription with _$Subscription {
   /// An active subscription whose end date has passed is shown as expired
   /// even if the database has not yet flipped the stored status.
   SubscriptionStatus get displayStatus {
-    if (status == SubscriptionStatus.active &&
+    if (status.isActive &&
         (remainingDays() ?? 0) <= 0) {
       return SubscriptionStatus.expired;
     }

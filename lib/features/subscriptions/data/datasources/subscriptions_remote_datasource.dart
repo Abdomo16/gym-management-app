@@ -43,16 +43,30 @@ class SubscriptionsRemoteDataSource {
     required String organizationId,
     required String memberId,
     required String planId,
+    double? price,
     DateTime? startDate,
   }) async {
     try {
+      final plan = await _client
+          .from(_plansTable)
+          .select('price')
+          .eq('id', planId)
+          .single();
+      final planPrice = (plan['price'] as num?)?.toDouble();
+      final resolvedPrice = price ?? planPrice;
+      if (resolvedPrice == null) {
+        throw const ValidationFailure(
+          message: 'The selected subscription plan has no price.',
+        );
+      }
       final row = await _client
           .from(_subscriptionsTable)
           .insert({
             'organization_id': organizationId,
             'member_id': memberId,
             'plan_id': planId,
-            'start_date': (startDate ?? DateTime.now()).toIso8601String(),
+            'start_date': _dateOnly(startDate ?? DateTime.now()),
+            'price': resolvedPrice,
           })
           .select()
           .single();
@@ -109,4 +123,9 @@ class SubscriptionsRemoteDataSource {
     }
     return rows.cast<Map<String, dynamic>>();
   }
+
+  static String _dateOnly(DateTime date) =>
+      '${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
 }

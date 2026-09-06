@@ -30,6 +30,7 @@ abstract interface class SubscriptionRepository {
     required String organizationId,
     required String memberId,
     required String planId,
+    double? price,
     DateTime? startDate,
   });
 

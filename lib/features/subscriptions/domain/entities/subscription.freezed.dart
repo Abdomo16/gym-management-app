@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Subscription {
 
- String get id; String get organizationId; String get memberId; String get planId; DateTime get startDate; DateTime? get endDate; SubscriptionStatus get status; DateTime? get createdAt; DateTime? get updatedAt;
+ String get id; String get organizationId; String get memberId; String get planId; DateTime get startDate; DateTime? get endDate; double? get price; String? get paymentStatus; String? get createdBy; SubscriptionStatus get status; DateTime? get createdAt; DateTime? get updatedAt;
 /// Create a copy of Subscription
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SubscriptionCopyWith<Subscription> get copyWith => _$SubscriptionCopyWithImpl<S
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Subscription&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.memberId, memberId) || other.memberId == memberId)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Subscription&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.memberId, memberId) || other.memberId == memberId)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.price, price) || other.price == price)&&(identical(other.paymentStatus, paymentStatus) || other.paymentStatus == paymentStatus)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,memberId,planId,startDate,endDate,status,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,organizationId,memberId,planId,startDate,endDate,price,paymentStatus,createdBy,status,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'Subscription(id: $id, organizationId: $organizationId, memberId: $memberId, planId: $planId, startDate: $startDate, endDate: $endDate, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Subscription(id: $id, organizationId: $organizationId, memberId: $memberId, planId: $planId, startDate: $startDate, endDate: $endDate, price: $price, paymentStatus: $paymentStatus, createdBy: $createdBy, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SubscriptionCopyWith<$Res>  {
   factory $SubscriptionCopyWith(Subscription value, $Res Function(Subscription) _then) = _$SubscriptionCopyWithImpl;
 @useResult
 $Res call({
- String id, String organizationId, String memberId, String planId, DateTime startDate, DateTime? endDate, SubscriptionStatus status, DateTime? createdAt, DateTime? updatedAt
+ String id, String organizationId, String memberId, String planId, DateTime startDate, DateTime? endDate, double? price, String? paymentStatus, String? createdBy, SubscriptionStatus status, DateTime? createdAt, DateTime? updatedAt
 });
 
 
@@ -62,7 +62,7 @@ class _$SubscriptionCopyWithImpl<$Res>
 
 /// Create a copy of Subscription
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? memberId = null,Object? planId = null,Object? startDate = null,Object? endDate = freezed,Object? status = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? memberId = null,Object? planId = null,Object? startDate = null,Object? endDate = freezed,Object? price = freezed,Object? paymentStatus = freezed,Object? createdBy = freezed,Object? status = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
@@ -70,7 +70,10 @@ as String,memberId: null == memberId ? _self.memberId : memberId // ignore: cast
 as String,planId: null == planId ? _self.planId : planId // ignore: cast_nullable_to_non_nullable
 as String,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
 as DateTime,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
-as DateTime?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as DateTime?,price: freezed == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
+as double?,paymentStatus: freezed == paymentStatus ? _self.paymentStatus : paymentStatus // ignore: cast_nullable_to_non_nullable
+as String?,createdBy: freezed == createdBy ? _self.createdBy : createdBy // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SubscriptionStatus,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
@@ -158,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String memberId,  String planId,  DateTime startDate,  DateTime? endDate,  SubscriptionStatus status,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String memberId,  String planId,  DateTime startDate,  DateTime? endDate,  double? price,  String? paymentStatus,  String? createdBy,  SubscriptionStatus status,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Subscription() when $default != null:
-return $default(_that.id,_that.organizationId,_that.memberId,_that.planId,_that.startDate,_that.endDate,_that.status,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.organizationId,_that.memberId,_that.planId,_that.startDate,_that.endDate,_that.price,_that.paymentStatus,_that.createdBy,_that.status,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -179,10 +182,10 @@ return $default(_that.id,_that.organizationId,_that.memberId,_that.planId,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String memberId,  String planId,  DateTime startDate,  DateTime? endDate,  SubscriptionStatus status,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String memberId,  String planId,  DateTime startDate,  DateTime? endDate,  double? price,  String? paymentStatus,  String? createdBy,  SubscriptionStatus status,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Subscription():
-return $default(_that.id,_that.organizationId,_that.memberId,_that.planId,_that.startDate,_that.endDate,_that.status,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.organizationId,_that.memberId,_that.planId,_that.startDate,_that.endDate,_that.price,_that.paymentStatus,_that.createdBy,_that.status,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +202,10 @@ return $default(_that.id,_that.organizationId,_that.memberId,_that.planId,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String memberId,  String planId,  DateTime startDate,  DateTime? endDate,  SubscriptionStatus status,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String memberId,  String planId,  DateTime startDate,  DateTime? endDate,  double? price,  String? paymentStatus,  String? createdBy,  SubscriptionStatus status,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Subscription() when $default != null:
-return $default(_that.id,_that.organizationId,_that.memberId,_that.planId,_that.startDate,_that.endDate,_that.status,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.organizationId,_that.memberId,_that.planId,_that.startDate,_that.endDate,_that.price,_that.paymentStatus,_that.createdBy,_that.status,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -214,7 +217,7 @@ return $default(_that.id,_that.organizationId,_that.memberId,_that.planId,_that.
 
 
 class _Subscription extends Subscription {
-  const _Subscription({required this.id, required this.organizationId, required this.memberId, required this.planId, required this.startDate, this.endDate, this.status = SubscriptionStatus.active, this.createdAt, this.updatedAt}): super._();
+  const _Subscription({required this.id, required this.organizationId, required this.memberId, required this.planId, required this.startDate, this.endDate, this.price, this.paymentStatus, this.createdBy, this.status = SubscriptionStatus.active, this.createdAt, this.updatedAt}): super._();
   
 
 @override final  String id;
@@ -223,6 +226,9 @@ class _Subscription extends Subscription {
 @override final  String planId;
 @override final  DateTime startDate;
 @override final  DateTime? endDate;
+@override final  double? price;
+@override final  String? paymentStatus;
+@override final  String? createdBy;
 @override@JsonKey() final  SubscriptionStatus status;
 @override final  DateTime? createdAt;
 @override final  DateTime? updatedAt;
@@ -237,16 +243,16 @@ _$SubscriptionCopyWith<_Subscription> get copyWith => __$SubscriptionCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Subscription&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.memberId, memberId) || other.memberId == memberId)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Subscription&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.memberId, memberId) || other.memberId == memberId)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.endDate, endDate) || other.endDate == endDate)&&(identical(other.price, price) || other.price == price)&&(identical(other.paymentStatus, paymentStatus) || other.paymentStatus == paymentStatus)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.status, status) || other.status == status)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,memberId,planId,startDate,endDate,status,createdAt,updatedAt);
+int get hashCode => Object.hash(runtimeType,id,organizationId,memberId,planId,startDate,endDate,price,paymentStatus,createdBy,status,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'Subscription(id: $id, organizationId: $organizationId, memberId: $memberId, planId: $planId, startDate: $startDate, endDate: $endDate, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'Subscription(id: $id, organizationId: $organizationId, memberId: $memberId, planId: $planId, startDate: $startDate, endDate: $endDate, price: $price, paymentStatus: $paymentStatus, createdBy: $createdBy, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -257,7 +263,7 @@ abstract mixin class _$SubscriptionCopyWith<$Res> implements $SubscriptionCopyWi
   factory _$SubscriptionCopyWith(_Subscription value, $Res Function(_Subscription) _then) = __$SubscriptionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String organizationId, String memberId, String planId, DateTime startDate, DateTime? endDate, SubscriptionStatus status, DateTime? createdAt, DateTime? updatedAt
+ String id, String organizationId, String memberId, String planId, DateTime startDate, DateTime? endDate, double? price, String? paymentStatus, String? createdBy, SubscriptionStatus status, DateTime? createdAt, DateTime? updatedAt
 });
 
 
@@ -274,7 +280,7 @@ class __$SubscriptionCopyWithImpl<$Res>
 
 /// Create a copy of Subscription
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? memberId = null,Object? planId = null,Object? startDate = null,Object? endDate = freezed,Object? status = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? memberId = null,Object? planId = null,Object? startDate = null,Object? endDate = freezed,Object? price = freezed,Object? paymentStatus = freezed,Object? createdBy = freezed,Object? status = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_Subscription(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
@@ -282,7 +288,10 @@ as String,memberId: null == memberId ? _self.memberId : memberId // ignore: cast
 as String,planId: null == planId ? _self.planId : planId // ignore: cast_nullable_to_non_nullable
 as String,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
 as DateTime,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
-as DateTime?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as DateTime?,price: freezed == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
+as double?,paymentStatus: freezed == paymentStatus ? _self.paymentStatus : paymentStatus // ignore: cast_nullable_to_non_nullable
+as String?,createdBy: freezed == createdBy ? _self.createdBy : createdBy // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SubscriptionStatus,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
