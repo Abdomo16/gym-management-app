@@ -31,7 +31,9 @@ class AppScaffold extends StatelessWidget {
             body: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const AppSidebar(),
+                // Fixed sidebar width keeps the shrink-wrapped column inside
+                // a bounded box (required by the footer's Expanded row).
+                const SizedBox(width: 260, child: AppSidebar()),
                 const VerticalDivider(width: 1),
                 Expanded(child: child),
               ],

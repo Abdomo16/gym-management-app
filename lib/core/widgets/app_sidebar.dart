@@ -9,7 +9,9 @@ import 'package:gym_management_app/app/theme/app_colors.dart';
 import 'package:gym_management_app/app/theme/app_spacing.dart';
 import 'package:gym_management_app/core/widgets/app_logo.dart';
 import 'package:gym_management_app/features/auth/domain/entities/app_user.dart';
+import 'package:gym_management_app/features/auth/domain/entities/user_profile.dart';
 import 'package:gym_management_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:gym_management_app/features/auth/presentation/providers/auth_state_provider.dart';
 
 /// Navigation sidebar used on wide layouts and inside the mobile drawer.
 class AppSidebar extends ConsumerWidget {
@@ -22,7 +24,7 @@ class AppSidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final location = GoRouterState.of(context).uri.path;
-    final user = ref.watch(authControllerProvider).value;
+    final user = ref.watch(currentUserProvider);
 
     return Container(
       decoration: BoxDecoration(
@@ -71,14 +73,15 @@ class AppSidebar extends ConsumerWidget {
                         ),
                       ),
                     for (final item in section.items)
-                      _SidebarTile(
-                        item: item,
-                        selected: location == item.path,
-                        onTap: () {
-                          context.go(item.path);
-                          onItemSelected?.call();
-                        },
-                      ),
+                      if (_visibleForRole(item, user?.role))
+                        _SidebarTile(
+                          item: item,
+                          selected: location == item.path,
+                          onTap: () {
+                            context.go(item.path);
+                            onItemSelected?.call();
+                          },
+                        ),
                   ],
                 ],
               ),
@@ -94,6 +97,16 @@ class AppSidebar extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// Whether a nav item is visible to the current role (UI decision only;
+  /// RLS remains the security boundary).
+  bool _visibleForRole(AppNavItem item, UserRole? role) {
+    final allowedRoles = item.allowedRoles;
+    if (allowedRoles == null) {
+      return true;
+    }
+    return role != null && allowedRoles.contains(role);
   }
 }
 
@@ -147,11 +160,11 @@ class _UserFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final displayName = user?.displayName ?? user?.email ?? 'Account';
+    final displayName = user?.fullName ?? user?.email ?? 'Account';
     final initials = displayName.isNotEmpty
         ? displayName.trim().characters.first.toUpperCase()
         : '?';
-    final subtitle = user?.role.name ?? 'Signed out';
+    final subtitle = user?.role.label ?? 'Signed out';
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
