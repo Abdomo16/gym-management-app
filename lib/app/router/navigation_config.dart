@@ -93,7 +93,9 @@ const List<AppNavSection> appNavSections = [
 String? navTitleForPath(String path) {
   for (final section in appNavSections) {
     for (final item in section.items) {
-      if (item.path == path) {
+      if (item.path == path ||
+          (item.path == RoutePaths.employees &&
+              path.startsWith('${RoutePaths.employees}/'))) {
         return item.label;
       }
     }

@@ -17,6 +17,10 @@ import 'package:gym_management_app/features/auth/presentation/screens/invitation
 import 'package:gym_management_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:gym_management_app/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:gym_management_app/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:gym_management_app/features/employees/presentation/screens/edit_employee_screen.dart';
+import 'package:gym_management_app/features/employees/presentation/screens/employee_details_screen.dart';
+import 'package:gym_management_app/features/employees/presentation/screens/employees_screen.dart';
+import 'package:gym_management_app/features/employees/presentation/screens/invite_employee_screen.dart';
 import 'package:gym_management_app/features/members/presentation/screens/create_member_screen.dart';
 import 'package:gym_management_app/features/members/presentation/screens/edit_member_screen.dart';
 import 'package:gym_management_app/features/members/presentation/screens/member_details_screen.dart';
@@ -88,21 +92,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/members/:id',
-            builder: (context, state) => MemberDetailsScreen(
-              memberId: state.pathParameters['id']!,
-            ),
+            builder: (context, state) =>
+                MemberDetailsScreen(memberId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: '/members/:id/edit',
-            builder: (context, state) => EditMemberScreen(
-              memberId: state.pathParameters['id']!,
-            ),
+            builder: (context, state) =>
+                EditMemberScreen(memberId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: '/members/:id/subscriptions/new',
-            builder: (context, state) => SubscriptionFormScreen(
-              memberId: state.pathParameters['id']!,
-            ),
+            builder: (context, state) =>
+                SubscriptionFormScreen(memberId: state.pathParameters['id']!),
           ),
 
           GoRoute(
@@ -128,8 +129,21 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: RoutePaths.employees,
+            builder: (context, state) => const EmployeesScreen(),
+          ),
+          GoRoute(
+            path: RoutePaths.employeeInvite,
+            builder: (context, state) => const InviteEmployeeScreen(),
+          ),
+          GoRoute(
+            path: '/admin/employees/:id',
             builder: (context, state) =>
-                const AppPlaceholderScreen(featureName: 'Employees'),
+                EmployeeDetailsScreen(employeeId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: '/admin/employees/:id/edit',
+            builder: (context, state) =>
+                EditEmployeeScreen(employeeId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: RoutePaths.reports,
