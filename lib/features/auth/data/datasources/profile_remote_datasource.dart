@@ -14,7 +14,7 @@ class ProfileRemoteDataSource {
 
   static const String _profilesTable = 'profiles';
   static const String _createOrganizationRpc = 'create_organization_with_owner';
-  static const String _acceptInvitationRpc = 'accept_invitation';
+  static const String _acceptInvitationRpc = 'accept_employee_invitation';
 
   /// Loads the profile for [userId] from `public.profiles`, or `null` when
   /// the profile does not exist.
@@ -41,12 +41,15 @@ class ProfileRemoteDataSource {
     required String timezone,
   }) async {
     try {
-      await _client.rpc<void>(_createOrganizationRpc, params: {
-        'p_org_name': orgName,
-        'p_owner_full_name': ownerFullName,
-        'p_owner_phone': ownerPhone,
-        'p_timezone': timezone,
-      });
+      await _client.rpc<void>(
+        _createOrganizationRpc,
+        params: {
+          'p_org_name': orgName,
+          'p_owner_full_name': ownerFullName,
+          'p_owner_phone': ownerPhone,
+          'p_timezone': timezone,
+        },
+      );
     } on PostgrestException catch (error) {
       throw SupabaseFailure(
         message: 'Could not create your gym. Please try again.',
@@ -59,7 +62,10 @@ class ProfileRemoteDataSource {
   /// Accepts an employee invitation via the database's invitation mechanism.
   Future<void> acceptInvitation(String token) async {
     try {
-      await _client.rpc<void>(_acceptInvitationRpc, params: {'p_token': token});
+      await _client.rpc<String>(
+        _acceptInvitationRpc,
+        params: {'p_token': token},
+      );
     } on PostgrestException catch (error) {
       throw SupabaseFailure(
         message: 'Unable to accept the invitation. Please try again.',

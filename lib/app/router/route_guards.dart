@@ -32,8 +32,11 @@ extension RouteRequirementX on RouteRequirement {
 /// Returns the requirement for a location, or `null` when the location is
 /// open to any authenticated user.
 RouteRequirement? routeRequirementFor(String location) {
-  // Phase 02: every shell route requires authentication only. Role-gated
-  // routes (owner/manager) will be added here in later phases.
+  if (location == RoutePaths.employees ||
+      location == RoutePaths.employeeInvite ||
+      location.startsWith('${RoutePaths.employees}/')) {
+    return RouteRequirement.managerOrOwner;
+  }
   return null;
 }
 
@@ -59,11 +62,13 @@ String? appRedirect(Ref ref, GoRouterState state) {
       location == RoutePaths.login ? null : RoutePaths.login,
     AuthNeedsOnboarding() =>
       (location == RoutePaths.onboarding ||
-          location == RoutePaths.invitationAccept)
-      ? null
-      : RoutePaths.onboarding,
+              location == RoutePaths.invitationAccept)
+          ? null
+          : RoutePaths.onboarding,
     AuthDisabled() =>
-      location == RoutePaths.accountDisabled ? null : RoutePaths.accountDisabled,
+      location == RoutePaths.accountDisabled
+          ? null
+          : RoutePaths.accountDisabled,
     AuthError() =>
       location == RoutePaths.authError ? null : RoutePaths.authError,
     AuthAuthenticated(:final user) => _authenticatedRedirect(

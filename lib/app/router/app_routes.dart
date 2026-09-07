@@ -16,7 +16,7 @@ abstract final class RoutePaths {
   static const String attendance = '/attendance';
   static const String subscriptions = '/subscriptions';
   static const String payments = '/payments';
-  static const String employees = '/employees';
+  static const String employees = '/admin/employees';
   static const String reports = '/reports';
   static const String notifications = '/notifications';
   static const String branches = '/branches';
@@ -33,4 +33,10 @@ abstract final class RoutePaths {
   /// e.g. `/members/abc-123/subscriptions/new`.
   static String memberSubscriptionCreate(String id) =>
       '/members/$id/subscriptions/new';
+
+  static const String employeeInvite = '/admin/employees/invite';
+
+  static String employeeDetail(String id) => '/admin/employees/$id';
+
+  static String employeeEdit(String id) => '/admin/employees/$id/edit';
 }
