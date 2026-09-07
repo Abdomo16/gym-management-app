@@ -9,13 +9,21 @@ import 'package:gym_management_app/core/errors/app_failure.dart';
 import 'package:gym_management_app/core/widgets/app_scaffold.dart';
 import 'package:gym_management_app/core/widgets/app_text_field.dart';
 import 'package:gym_management_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:gym_management_app/features/dashboard/presentation/providers/dashboard_provider.dart';
 
+import 'dashboard/dashboard_test_fixtures.dart';
 import 'helpers/auth_fixtures.dart';
 import 'helpers/fake_auth_repository.dart';
+import 'helpers/fake_dashboard_repository.dart';
 
 Widget appWith(FakeAuthRepository repository) {
   return ProviderScope(
-    overrides: [authRepositoryProvider.overrideWithValue(repository)],
+    overrides: [
+      authRepositoryProvider.overrideWithValue(repository),
+      dashboardRepositoryProvider.overrideWithValue(
+        FakeDashboardRepository(snapshot: makeDashboardSnapshot()),
+      ),
+    ],
     child: const GymApp(),
   );
 }
@@ -41,7 +49,7 @@ void main() {
     await tester.pumpWidget(appWith(repository));
     await tester.pumpAndSettle();
 
-    expect(find.text('Recent check-ins'), findsOneWidget);
+    expect(find.text('Total members'), findsOneWidget);
     expect(find.textContaining('Alex Owner'), findsOneWidget);
   });
 
@@ -62,7 +70,7 @@ void main() {
     await tester.tap(find.text('Sign in'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Recent check-ins'), findsOneWidget);
+    expect(find.text('Total members'), findsOneWidget);
   });
 
   testWidgets('shows a friendly error on failed sign-in', (tester) async {
@@ -99,7 +107,7 @@ void main() {
     router.go(RoutePaths.login);
     await tester.pumpAndSettle();
 
-    expect(find.text('Recent check-ins'), findsOneWidget);
+    expect(find.text('Total members'), findsOneWidget);
     expect(find.text('Welcome back'), findsNothing);
   });
 

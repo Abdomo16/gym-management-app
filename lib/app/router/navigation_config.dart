@@ -53,11 +53,6 @@ const List<AppNavSection> appNavSections = [
       path: RoutePaths.subscriptions,
     ),
     AppNavItem(
-      label: 'Payments',
-      icon: Icons.payments_outlined,
-      path: RoutePaths.payments,
-    ),
-    AppNavItem(
       label: 'Employees',
       icon: Icons.badge_outlined,
       path: RoutePaths.employees,
