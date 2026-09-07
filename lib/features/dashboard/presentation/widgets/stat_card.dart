@@ -10,16 +10,19 @@ class StatCard extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
+    this.onTap,
   });
 
   final String label;
   final String value;
   final IconData icon;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AppCard(
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

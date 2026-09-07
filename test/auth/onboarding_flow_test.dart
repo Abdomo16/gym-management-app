@@ -6,12 +6,20 @@ import 'package:gym_management_app/app/app.dart';
 import 'package:gym_management_app/core/errors/app_failure.dart';
 import 'package:gym_management_app/features/auth/domain/entities/auth_state.dart';
 import 'package:gym_management_app/features/auth/presentation/providers/auth_providers.dart';
+import 'package:gym_management_app/features/dashboard/presentation/providers/dashboard_provider.dart';
 
+import '../dashboard/dashboard_test_fixtures.dart';
 import '../helpers/fake_auth_repository.dart';
+import '../helpers/fake_dashboard_repository.dart';
 
 Widget appWith(FakeAuthRepository repository) {
   return ProviderScope(
-    overrides: [authRepositoryProvider.overrideWithValue(repository)],
+    overrides: [
+      authRepositoryProvider.overrideWithValue(repository),
+      dashboardRepositoryProvider.overrideWithValue(
+        FakeDashboardRepository(snapshot: makeDashboardSnapshot()),
+      ),
+    ],
     child: const GymApp(),
   );
 }
@@ -62,7 +70,7 @@ void main() {
     await tester.tap(find.text('Create gym'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Recent check-ins'), findsOneWidget);
+    expect(find.text('Total members'), findsOneWidget);
     expect(find.textContaining('Alex Owner'), findsOneWidget);
   });
 
