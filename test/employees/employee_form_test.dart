@@ -22,7 +22,6 @@ void main() {
             onSubmit:
                 ({
                   required fullName,
-                  required email,
                   required phone,
                   required role,
                   required branchId,
@@ -42,20 +41,19 @@ void main() {
     await tester.pump();
 
     expect(find.text('Full name is required.'), findsOneWidget);
-    expect(find.text('This field is required.'), findsOneWidget);
     expect(find.text('Select a branch.'), findsOneWidget);
   });
 
-  testWidgets('invite form rejects invalid email', (tester) async {
+  testWidgets('invite form accepts an optional phone', (tester) async {
     await tester.pumpWidget(buildForm());
     await tester.pumpAndSettle();
 
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.at(0), 'Sara Ali');
-    await tester.enterText(fields.at(1), 'not-an-email');
+    await tester.enterText(fields.at(1), '01012345678');
     await tester.tap(find.text('Send invitation'));
     await tester.pump();
 
-    expect(find.text('Enter a valid email address.'), findsOneWidget);
+    expect(find.text('Full name is required.'), findsNothing);
   });
 }

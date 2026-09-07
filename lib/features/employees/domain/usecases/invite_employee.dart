@@ -9,13 +9,13 @@ class InviteEmployee {
 
   Future<EmployeeInvitation> call({
     required String fullName,
-    required String email,
+    String? phone,
     required UserRole role,
     String? branchId,
   }) {
     return _repository.inviteEmployee(
       fullName: fullName,
-      email: email,
+      phone: phone,
       role: role,
       branchId: branchId,
     );

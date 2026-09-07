@@ -86,10 +86,6 @@ class _EmployeeDetailsBody extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                     _InfoRow(label: 'Full name', value: employee.fullName),
                     _InfoRow(
-                      label: 'Email',
-                      value: employee.email ?? 'Not available',
-                    ),
-                    _InfoRow(
                       label: 'Phone',
                       value: employee.phone ?? 'Not provided',
                     ),

@@ -39,7 +39,6 @@ class FakeEmployeeRepository implements EmployeeRepository {
       phone: '01012345678',
       role: role,
       isActive: isActive,
-      email: 'sara@gym.test',
       createdAt: DateTime(2026, 1, 1),
     );
   }
@@ -63,22 +62,13 @@ class FakeEmployeeRepository implements EmployeeRepository {
   @override
   Future<EmployeeInvitation> inviteEmployee({
     required String fullName,
-    required String email,
+    String? phone,
     required UserRole role,
     String? branchId,
   }) async {
     final error = inviteError;
     if (error != null) throw error;
-    return EmployeeInvitation(
-      id: 'invitation-1',
-      organizationId: 'org-1',
-      branchId: branchId,
-      fullName: fullName,
-      email: email,
-      role: role,
-      token: 'token-1',
-      status: EmployeeInvitationStatus.pending,
-    );
+    return EmployeeInvitation(token: 'token-1');
   }
 
   @override

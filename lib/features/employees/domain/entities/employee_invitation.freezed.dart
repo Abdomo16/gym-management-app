@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$EmployeeInvitation {
 
- String get id; String get organizationId; String? get branchId; String get fullName; String get email; UserRole get role; String get token; EmployeeInvitationStatus get status; DateTime? get expiresAt; DateTime? get createdAt;
+ String get token;
 /// Create a copy of EmployeeInvitation
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $EmployeeInvitationCopyWith<EmployeeInvitation> get copyWith => _$EmployeeInvita
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EmployeeInvitation&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.branchId, branchId) || other.branchId == branchId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.token, token) || other.token == token)&&(identical(other.status, status) || other.status == status)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EmployeeInvitation&&(identical(other.token, token) || other.token == token));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,branchId,fullName,email,role,token,status,expiresAt,createdAt);
+int get hashCode => Object.hash(runtimeType,token);
 
 @override
 String toString() {
-  return 'EmployeeInvitation(id: $id, organizationId: $organizationId, branchId: $branchId, fullName: $fullName, email: $email, role: $role, token: $token, status: $status, expiresAt: $expiresAt, createdAt: $createdAt)';
+  return 'EmployeeInvitation(token: $token)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $EmployeeInvitationCopyWith<$Res>  {
   factory $EmployeeInvitationCopyWith(EmployeeInvitation value, $Res Function(EmployeeInvitation) _then) = _$EmployeeInvitationCopyWithImpl;
 @useResult
 $Res call({
- String id, String organizationId, String? branchId, String fullName, String email, UserRole role, String token, EmployeeInvitationStatus status, DateTime? expiresAt, DateTime? createdAt
+ String token
 });
 
 
@@ -62,19 +62,10 @@ class _$EmployeeInvitationCopyWithImpl<$Res>
 
 /// Create a copy of EmployeeInvitation
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? branchId = freezed,Object? fullName = null,Object? email = null,Object? role = null,Object? token = null,Object? status = null,Object? expiresAt = freezed,Object? createdAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? token = null,}) {
   return _then(_self.copyWith(
-id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
-as String,branchId: freezed == branchId ? _self.branchId : branchId // ignore: cast_nullable_to_non_nullable
-as String?,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
-as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as UserRole,token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as EmployeeInvitationStatus,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -159,10 +150,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String? branchId,  String fullName,  String email,  UserRole role,  String token,  EmployeeInvitationStatus status,  DateTime? expiresAt,  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String token)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EmployeeInvitation() when $default != null:
-return $default(_that.id,_that.organizationId,_that.branchId,_that.fullName,_that.email,_that.role,_that.token,_that.status,_that.expiresAt,_that.createdAt);case _:
+return $default(_that.token);case _:
   return orElse();
 
 }
@@ -180,10 +171,10 @@ return $default(_that.id,_that.organizationId,_that.branchId,_that.fullName,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String? branchId,  String fullName,  String email,  UserRole role,  String token,  EmployeeInvitationStatus status,  DateTime? expiresAt,  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String token)  $default,) {final _that = this;
 switch (_that) {
 case _EmployeeInvitation():
-return $default(_that.id,_that.organizationId,_that.branchId,_that.fullName,_that.email,_that.role,_that.token,_that.status,_that.expiresAt,_that.createdAt);case _:
+return $default(_that.token);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +191,10 @@ return $default(_that.id,_that.organizationId,_that.branchId,_that.fullName,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String? branchId,  String fullName,  String email,  UserRole role,  String token,  EmployeeInvitationStatus status,  DateTime? expiresAt,  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String token)?  $default,) {final _that = this;
 switch (_that) {
 case _EmployeeInvitation() when $default != null:
-return $default(_that.id,_that.organizationId,_that.branchId,_that.fullName,_that.email,_that.role,_that.token,_that.status,_that.expiresAt,_that.createdAt);case _:
+return $default(_that.token);case _:
   return null;
 
 }
@@ -215,19 +206,10 @@ return $default(_that.id,_that.organizationId,_that.branchId,_that.fullName,_tha
 
 
 class _EmployeeInvitation implements EmployeeInvitation {
-  const _EmployeeInvitation({required this.id, required this.organizationId, this.branchId, required this.fullName, required this.email, required this.role, required this.token, required this.status, this.expiresAt, this.createdAt});
+  const _EmployeeInvitation({required this.token});
 
 
-@override final  String id;
-@override final  String organizationId;
-@override final  String? branchId;
-@override final  String fullName;
-@override final  String email;
-@override final  UserRole role;
 @override final  String token;
-@override final  EmployeeInvitationStatus status;
-@override final  DateTime? expiresAt;
-@override final  DateTime? createdAt;
 
 /// Create a copy of EmployeeInvitation
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +221,16 @@ _$EmployeeInvitationCopyWith<_EmployeeInvitation> get copyWith => __$EmployeeInv
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EmployeeInvitation&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.branchId, branchId) || other.branchId == branchId)&&(identical(other.fullName, fullName) || other.fullName == fullName)&&(identical(other.email, email) || other.email == email)&&(identical(other.role, role) || other.role == role)&&(identical(other.token, token) || other.token == token)&&(identical(other.status, status) || other.status == status)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EmployeeInvitation&&(identical(other.token, token) || other.token == token));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,branchId,fullName,email,role,token,status,expiresAt,createdAt);
+int get hashCode => Object.hash(runtimeType,token);
 
 @override
 String toString() {
-  return 'EmployeeInvitation(id: $id, organizationId: $organizationId, branchId: $branchId, fullName: $fullName, email: $email, role: $role, token: $token, status: $status, expiresAt: $expiresAt, createdAt: $createdAt)';
+  return 'EmployeeInvitation(token: $token)';
 }
 
 
@@ -259,7 +241,7 @@ abstract mixin class _$EmployeeInvitationCopyWith<$Res> implements $EmployeeInvi
   factory _$EmployeeInvitationCopyWith(_EmployeeInvitation value, $Res Function(_EmployeeInvitation) _then) = __$EmployeeInvitationCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String organizationId, String? branchId, String fullName, String email, UserRole role, String token, EmployeeInvitationStatus status, DateTime? expiresAt, DateTime? createdAt
+ String token
 });
 
 
@@ -276,19 +258,10 @@ class __$EmployeeInvitationCopyWithImpl<$Res>
 
 /// Create a copy of EmployeeInvitation
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? branchId = freezed,Object? fullName = null,Object? email = null,Object? role = null,Object? token = null,Object? status = null,Object? expiresAt = freezed,Object? createdAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? token = null,}) {
   return _then(_EmployeeInvitation(
-id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
-as String,branchId: freezed == branchId ? _self.branchId : branchId // ignore: cast_nullable_to_non_nullable
-as String?,fullName: null == fullName ? _self.fullName : fullName // ignore: cast_nullable_to_non_nullable
-as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
-as UserRole,token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as EmployeeInvitationStatus,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

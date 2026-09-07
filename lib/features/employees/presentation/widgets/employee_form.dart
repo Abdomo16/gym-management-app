@@ -23,7 +23,6 @@ class EmployeeForm extends ConsumerStatefulWidget {
   final Employee? initial;
   final void Function({
     required String fullName,
-    required String? email,
     required String? phone,
     required UserRole role,
     required String? branchId,
@@ -40,7 +39,6 @@ class EmployeeForm extends ConsumerStatefulWidget {
 class _EmployeeFormState extends ConsumerState<EmployeeForm> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
-  late final TextEditingController _emailController;
   late final TextEditingController _phoneController;
   late UserRole _role;
   String? _branchId;
@@ -52,7 +50,6 @@ class _EmployeeFormState extends ConsumerState<EmployeeForm> {
     super.initState();
     final employee = widget.initial;
     _nameController = TextEditingController(text: employee?.fullName ?? '');
-    _emailController = TextEditingController(text: employee?.email ?? '');
     _phoneController = TextEditingController(text: employee?.phone ?? '');
     _role = employee?.role ?? UserRole.receptionist;
     _branchId = employee?.branchId;
@@ -61,7 +58,6 @@ class _EmployeeFormState extends ConsumerState<EmployeeForm> {
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
     _phoneController.dispose();
     super.dispose();
   }
@@ -70,7 +66,6 @@ class _EmployeeFormState extends ConsumerState<EmployeeForm> {
     if (!_formKey.currentState!.validate()) return;
     widget.onSubmit(
       fullName: _nameController.text.trim(),
-      email: isInvite ? _emailController.text.trim().toLowerCase() : null,
       phone: _phoneController.text.trim().isEmpty
           ? null
           : _phoneController.text.trim(),
@@ -96,28 +91,17 @@ class _EmployeeFormState extends ConsumerState<EmployeeForm> {
                 Validators.required(value, message: 'Full name is required.'),
           ),
           const SizedBox(height: AppSpacing.md),
-          if (isInvite) ...[
-            AppTextField(
-              label: 'Email *',
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              validator: Validators.email,
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ] else ...[
-            AppTextField(
-              label: 'Phone',
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              textInputAction: TextInputAction.next,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) return null;
-                return Validators.phone(value);
-              },
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
+          AppTextField(
+            label: isInvite ? 'Phone' : 'Phone',
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) return null;
+              return Validators.phone(value);
+            },
+          ),
+          const SizedBox(height: AppSpacing.md),
           DropdownButtonFormField<UserRole>(
             initialValue: _role,
             decoration: const InputDecoration(labelText: 'Role *'),
@@ -157,7 +141,7 @@ class _EmployeeFormState extends ConsumerState<EmployeeForm> {
           ],
           AppButton(
             label: widget.submitLabel,
-            icon: isInvite ? Icons.mail_outline : Icons.save_outlined,
+            icon: isInvite ? Icons.key_outlined : Icons.save_outlined,
             busy: widget.busy,
             expanded: true,
             onPressed: widget.busy ? null : _submit,

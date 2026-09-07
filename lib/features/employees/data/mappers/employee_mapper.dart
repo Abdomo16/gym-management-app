@@ -19,7 +19,6 @@ abstract final class EmployeeMapper {
       phone: map['phone'] as String?,
       role: role,
       branchName: map['branch_name'] as String? ?? branch?['name'] as String?,
-      email: map['email'] as String?,
       avatarUrl: map['avatar_url'] as String?,
       isActive: map['is_active'] as bool? ?? true,
       createdAt: _parseDate(map['created_at']),

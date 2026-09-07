@@ -37,14 +37,13 @@ class _InviteEmployeeScreenState extends ConsumerState<InviteEmployeeScreen> {
               onSubmit:
                   ({
                     required fullName,
-                    required email,
                     required phone,
                     required role,
                     required branchId,
                   }) {
                     _invite(
                       fullName: fullName,
-                      email: email!,
+                      phone: phone,
                       role: role,
                       branchId: branchId,
                     );
@@ -58,20 +57,37 @@ class _InviteEmployeeScreenState extends ConsumerState<InviteEmployeeScreen> {
 
   Future<void> _invite({
     required String fullName,
-    required String email,
+    String? phone,
     required UserRole role,
     required String? branchId,
   }) async {
     setState(() => _errorMessage = null);
     try {
-      await ref
+      final invitation = await ref
           .read(employeesControllerProvider.notifier)
           .invite(
             fullName: fullName,
-            email: email,
+            phone: phone,
             role: role,
             branchId: branchId,
           );
+      if (!mounted) return;
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Invitation created'),
+          content: SelectableText(
+            'Share this invitation token with the employee:\n\n'
+            '${invitation.token}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Done'),
+            ),
+          ],
+        ),
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

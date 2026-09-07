@@ -66,7 +66,6 @@ class _EditEmployeeFormState extends ConsumerState<_EditEmployeeForm> {
             onSubmit:
                 ({
                   required fullName,
-                  required email,
                   required phone,
                   required role,
                   required branchId,

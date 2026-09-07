@@ -18,14 +18,14 @@ class EmployeesController extends Notifier<EmployeeActionStatus> {
 
   Future<EmployeeInvitation> invite({
     required String fullName,
-    required String email,
+    String? phone,
     required UserRole role,
     String? branchId,
   }) {
     return _run(
       () => InviteEmployee(ref.read(employeeRepositoryProvider))(
         fullName: fullName,
-        email: email,
+        phone: phone,
         role: role,
         branchId: branchId,
       ),

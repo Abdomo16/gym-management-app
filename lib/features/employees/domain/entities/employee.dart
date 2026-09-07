@@ -14,7 +14,6 @@ abstract class Employee with _$Employee {
     String? phone,
     required UserRole role,
     String? branchName,
-    String? email,
     String? avatarUrl,
     @Default(true) bool isActive,
     DateTime? createdAt,

@@ -51,24 +51,29 @@ class EmployeeRemoteDataSource {
     }
   }
 
-  Future<Map<String, dynamic>> inviteEmployee({
+  Future<String> inviteEmployee({
     required String fullName,
-    required String email,
+    String? phone,
     required UserRole role,
     String? branchId,
   }) async {
     _validateEmployeeRole(role);
     try {
-      final row = await _client.rpc<Map<String, dynamic>>(
+      final token = await _client.rpc<String>(
         _invitationRpc,
         params: {
           'p_full_name': fullName.trim(),
-          'p_email': email.trim().toLowerCase(),
+          'p_phone': phone?.trim(),
           'p_role': role.name,
           'p_branch_id': branchId,
         },
       );
-      return row;
+      if (token.isEmpty) {
+        throw const SupabaseFailure(
+          message: 'The invitation was created without a token.',
+        );
+      }
+      return token;
     } on PostgrestException catch (error) {
       throw _mapError(error, 'Unable to create the employee invitation.');
     }

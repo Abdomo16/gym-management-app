@@ -40,18 +40,18 @@ class SupabaseEmployeeRepository implements EmployeeRepository {
   @override
   Future<EmployeeInvitation> inviteEmployee({
     required String fullName,
-    required String email,
+    String? phone,
     required UserRole role,
     String? branchId,
   }) async {
     try {
-      final row = await _dataSource.inviteEmployee(
+      final token = await _dataSource.inviteEmployee(
         fullName: fullName,
-        email: email,
+        phone: phone,
         role: role,
         branchId: branchId,
       );
-      return EmployeeInvitationMapper.fromMap(row);
+      return EmployeeInvitationMapper.fromToken(token);
     } on AppFailure {
       rethrow;
     } catch (error) {

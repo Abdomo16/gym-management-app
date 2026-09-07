@@ -21,12 +21,11 @@ void main() {
         .read(employeesControllerProvider.notifier)
         .invite(
           fullName: 'Sara Ali',
-          email: 'sara@gym.test',
           role: UserRole.receptionist,
           branchId: 'branch-1',
         );
 
-    expect(invitation.status.name, 'pending');
+    expect(invitation.token, 'token-1');
     expect(
       container.read(employeesControllerProvider),
       EmployeeActionStatus.idle,

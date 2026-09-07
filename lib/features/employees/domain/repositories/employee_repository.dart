@@ -9,7 +9,7 @@ abstract interface class EmployeeRepository {
 
   Future<EmployeeInvitation> inviteEmployee({
     required String fullName,
-    required String email,
+    String? phone,
     required UserRole role,
     String? branchId,
   });
