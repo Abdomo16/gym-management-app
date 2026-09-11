@@ -90,13 +90,19 @@ abstract final class AppTheme {
         space: 1,
       ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 68,
-        backgroundColor: isDark ? AppColors.surfaceDark : Colors.white,
+        height: 66,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
-        indicatorColor: colorScheme.primaryContainer,
+        shadowColor: Colors.transparent,
+        indicatorColor: colorScheme.primary.withValues(alpha: 0.16),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
+            size: 24,
             color: states.contains(WidgetState.selected)
                 ? colorScheme.primary
                 : colorScheme.onSurfaceVariant,
