@@ -64,16 +64,6 @@ const List<AppNavSection> appNavSections = [
       path: RoutePaths.branches,
       allowedRoles: {UserRole.owner, UserRole.manager},
     ),
-    AppNavItem(
-      label: 'Reports',
-      icon: Icons.insights_outlined,
-      path: RoutePaths.reports,
-    ),
-    AppNavItem(
-      label: 'Notifications',
-      icon: Icons.notifications_outlined,
-      path: RoutePaths.notifications,
-    ),
   ]),
   AppNavSection(title: 'System', items: [
     AppNavItem(

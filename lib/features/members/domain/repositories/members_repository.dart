@@ -7,8 +7,11 @@ import 'package:gym_management_app/features/members/domain/entities/member.dart'
 /// subtypes before they reach the rest of the application. Every query is
 /// tenant-scoped by RLS; the client never selects an organization.
 abstract interface class MembersRepository {
-  /// Loads the first page of members for the current organization.
-  Future<List<Member>> getMembers({int limit = 50});
+  /// Loads one page of members for the current organization, newest first.
+  ///
+  /// [offset] pages through the list; an empty or shorter-than-[limit]
+  /// result means the end of the list has been reached.
+  Future<List<Member>> getMembers({int limit = 50, int offset = 0});
 
   /// Searches members by name, phone or member code.
   ///

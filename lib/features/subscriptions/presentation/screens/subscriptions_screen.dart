@@ -159,19 +159,6 @@ class _PlanCard extends StatelessWidget {
   final bool canManage;
   final VoidCallback onDelete;
 
-  /// "1 month", "2 months", ... "1 year" for month-based plans; falls back
-  /// to the plan's own duration label otherwise.
-  String get _durationLabel {
-    final days = plan.durationDays;
-    if (days != null && days > 0 && days % 30 == 0) {
-      final months = days ~/ 30;
-      if (months == 1) return '1 month';
-      if (months == 12) return '1 year';
-      return '$months months';
-    }
-    return plan.durationLabel;
-  }
-
   String? get _priceLabel {
     final price = plan.price;
     if (price == null || price <= 0) {
@@ -214,7 +201,7 @@ class _PlanCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  _durationLabel,
+                  plan.durationLabel,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),

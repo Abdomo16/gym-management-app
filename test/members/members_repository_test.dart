@@ -55,6 +55,19 @@ void main() {
       expect(result.length, 4);
     });
 
+    test('offset pages past the first slice', () async {
+      final many = List.generate(
+        10,
+        (i) => FakeMembersRepository.makeTestMember(id: 'member-$i'),
+      );
+      final repo = makeRepo(members: many);
+      final page = await repo.getMembers(limit: 4, offset: 6);
+      expect(page, hasLength(4));
+      expect(page.map((m) => m.id), ['member-6', 'member-7', 'member-8', 'member-9']);
+      final tail = await repo.getMembers(limit: 4, offset: 8);
+      expect(tail, hasLength(2));
+    });
+
     test('throws SupabaseFailure when throwOnGet is true', () async {
       final repo = makeRepo(throwOnGet: true);
       await expectLater(

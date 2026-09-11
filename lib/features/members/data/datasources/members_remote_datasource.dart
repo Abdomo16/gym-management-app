@@ -15,13 +15,19 @@ class MembersRemoteDataSource {
   static const String _membersTable = 'members';
   static const String _branchesTable = 'branches';
 
-  /// Loads the first page of members (newest first) for the current org.
-  Future<List<Map<String, dynamic>>> getMembers({int limit = 50}) async {
+  /// Loads one page of members (newest first) for the current org.
+  ///
+  /// [offset] and [limit] page through the list; callers append pages until
+  /// a shorter-than-limit page signals the end of the list.
+  Future<List<Map<String, dynamic>>> getMembers({
+    int limit = 50,
+    int offset = 0,
+  }) async {
     final rows = await _client
         .from(_membersTable)
         .select()
         .order('created_at', ascending: false)
-        .limit(limit);
+        .range(offset, offset + limit - 1);
     return _asList(rows);
   }
 

@@ -23,21 +23,34 @@ abstract class SubscriptionPlan with _$SubscriptionPlan {
 
   const SubscriptionPlan._();
 
-  /// A short label describing the plan duration, e.g. "30 days".
+  /// A short label describing the plan duration, e.g. "1 month", "1 year".
   String get durationLabel {
     final days = durationDays;
     if (days == null) {
       return 'Duration not set';
     }
     if (days % 30 == 0) {
-      final months = days ~/ 30;
-      return months == 1 ? '1 month' : '$months months';
+      return monthsLabel(days ~/ 30);
     }
     if (days % 7 == 0 && days != 0) {
       final weeks = days ~/ 7;
       return weeks == 1 ? '1 week' : '$weeks weeks';
     }
     return days == 1 ? '1 day' : '$days days';
+  }
+
+  /// Human label for a whole number of months: "1 month", "1 year".
+  ///
+  /// Shared by the entity label and the plan form's duration picker so
+  /// month-based durations read identically everywhere.
+  static String monthsLabel(int months) {
+    if (months == 1) {
+      return '1 month';
+    }
+    if (months == 12) {
+      return '1 year';
+    }
+    return '$months months';
   }
 
   /// Price formatted for display, or `null` when the plan has no price.

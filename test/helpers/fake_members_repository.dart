@@ -50,11 +50,11 @@ class FakeMembersRepository implements MembersRepository {
   // ---------------------------------------------------------------------------
 
   @override
-  Future<List<Member>> getMembers({int limit = 50}) async {
+  Future<List<Member>> getMembers({int limit = 50, int offset = 0}) async {
     if (throwOnGet) {
       throw const SupabaseFailure(message: 'Failed to load members.');
     }
-    return _members.take(limit).toList();
+    return _members.skip(offset).take(limit).toList();
   }
 
   @override
