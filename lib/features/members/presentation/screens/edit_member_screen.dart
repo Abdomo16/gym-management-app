@@ -86,6 +86,7 @@ class _EditFormState extends ConsumerState<_EditForm> {
           gender,
           dateOfBirth,
           notes,
+          subscriptionPlanId,
         }) => _save(
           fullName: fullName,
           phone: phone,

@@ -135,21 +135,33 @@ class _DashboardContent extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.md,
-            children: [
-              for (final stat in stats)
-                SizedBox(
-                  width: 220,
-                  child: StatCard(
-                    label: stat.label,
-                    icon: stat.icon,
-                    value: '${stat.value}',
-                    onTap: () => context.go(stat.path),
-                  ),
-                ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 900;
+              final columns = wide ? 3 : constraints.maxWidth >= 560 ? 3 : 2;
+              final horizontalPadding = AppSpacing.lg * 2;
+              final gaps = AppSpacing.md * (columns - 1);
+              final cardWidth =
+                  (constraints.maxWidth - horizontalPadding - gaps) / columns;
+              // Fixed card height keeps the grid compact at every width.
+              return GridView.count(
+                crossAxisCount: columns,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: AppSpacing.md,
+                crossAxisSpacing: AppSpacing.md,
+                childAspectRatio: cardWidth / 112,
+                children: [
+                  for (final stat in stats)
+                    StatCard(
+                      label: stat.label,
+                      icon: stat.icon,
+                      value: '${stat.value}',
+                      onTap: () => context.go(stat.path),
+                    ),
+                ],
+              );
+            },
           ),
           if (summary.totalMembers == 0) ...[
             const SizedBox(height: AppSpacing.lg),
