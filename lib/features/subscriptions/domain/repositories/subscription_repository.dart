@@ -13,6 +13,21 @@ abstract interface class SubscriptionRepository {
   /// server-side.
   Future<List<SubscriptionPlan>> getPlans({bool activeOnly = true});
 
+  /// Creates a subscription plan. Only owners and managers are permitted
+  /// by the database's RLS write policy; [organizationId] must come from
+  /// the authenticated tenant context — never from user input.
+  Future<SubscriptionPlan> createPlan({
+    required String organizationId,
+    required String name,
+    required int durationDays,
+    required double price,
+    String? description,
+  });
+
+  /// Soft-deletes a plan by deactivating it, preserving subscription
+  /// history. The database decides whether the caller may write.
+  Future<void> deactivatePlan(String planId);
+
   /// Full subscription history for one member, newest first.
   ///
   /// The current subscription is derived from this list by the

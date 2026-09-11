@@ -76,6 +76,46 @@ class SubscriptionsRemoteDataSource {
     }
   }
 
+  /// Inserts a subscription plan. Only owners and managers pass the
+  /// database's RLS write policy; [organizationId] must come from the
+  /// authenticated tenant context, never from user input.
+  Future<Map<String, dynamic>> createPlan({
+    required String organizationId,
+    required String name,
+    required int durationDays,
+    required double price,
+    String? description,
+  }) async {
+    try {
+      return await _client
+          .from(_plansTable)
+          .insert({
+            'organization_id': organizationId,
+            'name': name,
+            'duration_days': durationDays,
+            'price': price,
+            if (description != null && description.trim().isNotEmpty)
+              'description': description.trim(),
+          })
+          .select()
+          .single();
+    } on PostgrestException catch (error) {
+      throw _mapPlanWriteError(error);
+    }
+  }
+
+  /// Soft-deletes a plan by deactivating it. Plans referenced by existing
+  /// subscriptions cannot be hard-deleted (FK `ON DELETE RESTRICT`), and
+  /// deactivation preserves subscription history. Server RLS still decides
+  /// whether the caller may write.
+  Future<void> deactivatePlan(String id) async {
+    try {
+      await _client.from(_plansTable).update({'is_active': false}).eq('id', id);
+    } on PostgrestException catch (error) {
+      throw _mapPlanWriteError(error);
+    }
+  }
+
   /// Requests a status transition (freeze/cancel) through the database.
   Future<Map<String, dynamic>> updateSubscriptionStatus({
     required String id,
@@ -112,6 +152,29 @@ class SubscriptionsRemoteDataSource {
     }
     return SupabaseFailure(
       message: 'Unable to save the subscription. Please try again.',
+      code: error.code,
+      cause: error,
+    );
+  }
+
+  /// Maps write failures on `subscription_plans` (create/deactivate).
+  AppFailure _mapPlanWriteError(PostgrestException error) {
+    // 42501 = insufficient_privilege: the RLS write policy allows only
+    // owners and managers of the current organization.
+    if (error.code == '42501') {
+      return const SupabaseFailure(
+        message: 'Only the gym owner or a manager can manage subscription '
+            'plans.',
+      );
+    }
+    if (error.code == '23514') {
+      return const SupabaseFailure(
+        message: 'The plan details are not allowed by the current business '
+            'rules.',
+      );
+    }
+    return SupabaseFailure(
+      message: 'Unable to save the plan. Please try again.',
       code: error.code,
       cause: error,
     );

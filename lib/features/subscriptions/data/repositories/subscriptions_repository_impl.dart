@@ -26,6 +26,41 @@ class SupabaseSubscriptionRepository implements SubscriptionRepository {
   }
 
   @override
+  Future<SubscriptionPlan> createPlan({
+    required String organizationId,
+    required String name,
+    required int durationDays,
+    required double price,
+    String? description,
+  }) async {
+    try {
+      final row = await _dataSource.createPlan(
+        organizationId: organizationId,
+        name: name,
+        durationDays: durationDays,
+        price: price,
+        description: description,
+      );
+      return SubscriptionPlanMapper.fromMap(row);
+    } on AppFailure {
+      rethrow;
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
+  Future<void> deactivatePlan(String planId) async {
+    try {
+      await _dataSource.deactivatePlan(planId);
+    } on AppFailure {
+      rethrow;
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
   Future<List<Subscription>> getMemberSubscriptions(String memberId) async {
     try {
       final rows = await _dataSource.getMemberSubscriptions(memberId);
