@@ -137,6 +137,12 @@ class _CreateMemberScreenState extends ConsumerState<CreateMemberScreen> {
                       'ID: ${member.memberCode ?? member.id}',
             ),
             behavior: SnackBarBehavior.floating,
+            duration: subscriptionWarning == null
+                ? const Duration(seconds: 3)
+                : const Duration(seconds: 6),
+            backgroundColor: subscriptionWarning == null
+                ? null
+                : Theme.of(context).colorScheme.error,
           ),
         );
         // Navigate to details so the generated member code is visible.
