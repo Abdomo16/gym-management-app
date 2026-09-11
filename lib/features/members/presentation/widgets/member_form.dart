@@ -8,6 +8,8 @@ import 'package:gym_management_app/core/widgets/app_text_field.dart';
 import 'package:gym_management_app/features/members/domain/entities/branch_summary.dart';
 import 'package:gym_management_app/features/members/domain/entities/member.dart';
 import 'package:gym_management_app/features/members/presentation/providers/organization_branches_provider.dart';
+import 'package:gym_management_app/features/subscriptions/domain/entities/subscription_plan.dart';
+import 'package:gym_management_app/features/subscriptions/presentation/providers/subscription_plans_provider.dart';
 
 /// Shared create/edit member form.
 ///
@@ -36,6 +38,7 @@ class MemberForm extends ConsumerStatefulWidget {
     String? gender,
     DateTime? dateOfBirth,
     String? notes,
+    String? subscriptionPlanId,
   }) onSubmit;
 
   final String submitLabel;
@@ -64,6 +67,7 @@ class _MemberFormState extends ConsumerState<MemberForm> {
   String? _selectedBranchId;
   String? _selectedGender;
   DateTime? _dateOfBirth;
+  String? _selectedPlanId;
 
   @override
   void initState() {
@@ -96,6 +100,7 @@ class _MemberFormState extends ConsumerState<MemberForm> {
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
+      subscriptionPlanId: _selectedPlanId,
     );
   }
 
@@ -210,6 +215,30 @@ class _MemberFormState extends ConsumerState<MemberForm> {
 
           if (widget.showBranchPicker) const SizedBox(height: AppSpacing.md),
 
+          // Subscription duration (create mode only). Selecting a duration
+          // creates a subscription for the new member from the matching
+          // plan; the database computes the end date.
+          if (widget.initial == null) ...[
+            ref.watch(subscriptionPlansProvider).when(
+              data: (plans) => _DurationDropdown(
+                plans: _sortedPlans(plans),
+                value: _selectedPlanId,
+                onChanged: (id) => setState(() => _selectedPlanId = id),
+              ),
+              loading: () => const _DurationDropdown(
+                plans: [],
+                value: null,
+                onChanged: null,
+              ),
+              error: (e, _) => const _DurationDropdown(
+                plans: [],
+                value: null,
+                onChanged: null,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+
           // Notes
           AppTextField(
             label: 'Notes',
@@ -246,6 +275,80 @@ class _MemberFormState extends ConsumerState<MemberForm> {
           ),
         ],
       ),
+    );
+  }
+
+  /// Plans sorted by duration so the dropdown reads 1 month → 1 year.
+  static List<SubscriptionPlan> _sortedPlans(List<SubscriptionPlan> plans) {
+    final sorted = [...plans];
+    sorted.sort(
+      (a, b) => (a.durationDays ?? 0).compareTo(b.durationDays ?? 0),
+    );
+    return sorted;
+  }
+}
+
+/// Subscription-duration picker shown when creating a member. Each option
+/// is a plan; the plan's duration drives the membership end date.
+class _DurationDropdown extends StatelessWidget {
+  const _DurationDropdown({
+    required this.plans,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final List<SubscriptionPlan> plans;
+  final String? value;
+  final ValueChanged<String?>? onChanged;
+
+  /// "1 month", "2 months", ... "1 year" for month-based plans; falls back
+  /// to the plan's own duration label otherwise.
+  static String _durationLabel(SubscriptionPlan plan) {
+    final days = plan.durationDays;
+    if (days != null && days > 0 && days % 30 == 0) {
+      final months = days ~/ 30;
+      if (months == 1) return '1 month';
+      if (months == 12) return '1 year';
+      return '$months months';
+    }
+    return plan.durationLabel;
+  }
+
+  static String _optionLabel(SubscriptionPlan plan) {
+    final price = plan.price;
+    if (price == null || price <= 0) {
+      return _durationLabel(plan);
+    }
+    return '${_durationLabel(plan)} — ${plan.priceLabel}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (plans.isEmpty) {
+      return DropdownButtonFormField<String>(
+        initialValue: null,
+        decoration: const InputDecoration(
+          labelText: 'Subscription',
+          helperText: 'No plans available yet.',
+        ),
+        items: const [
+          DropdownMenuItem(value: null, child: Text('No subscription')),
+        ],
+        onChanged: null,
+      );
+    }
+    return DropdownButtonFormField<String>(
+      initialValue: value,
+      decoration: const InputDecoration(
+        labelText: 'Subscription duration',
+        helperText: 'A subscription is created with the selected duration.',
+      ),
+      items: [
+        const DropdownMenuItem(value: null, child: Text('No subscription')),
+        for (final plan in plans)
+          DropdownMenuItem(value: plan.id, child: Text(_optionLabel(plan))),
+      ],
+      onChanged: onChanged,
     );
   }
 }

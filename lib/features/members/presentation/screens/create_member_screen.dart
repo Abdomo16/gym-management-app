@@ -9,6 +9,7 @@ import 'package:gym_management_app/features/auth/domain/entities/user_profile.da
 import 'package:gym_management_app/features/auth/presentation/providers/auth_state_provider.dart';
 import 'package:gym_management_app/features/members/presentation/providers/members_controller.dart';
 import 'package:gym_management_app/features/members/presentation/widgets/member_form.dart';
+import 'package:gym_management_app/features/subscriptions/presentation/providers/subscription_controller.dart';
 
 /// Create-member screen.
 ///
@@ -46,6 +47,7 @@ class _CreateMemberScreenState extends ConsumerState<CreateMemberScreen> {
             gender,
             dateOfBirth,
             notes,
+            subscriptionPlanId,
           }) => _save(
             fullName: fullName,
             phone: phone,
@@ -53,6 +55,7 @@ class _CreateMemberScreenState extends ConsumerState<CreateMemberScreen> {
             gender: gender,
             dateOfBirth: dateOfBirth,
             notes: notes,
+            subscriptionPlanId: subscriptionPlanId,
           ),
           submitLabel: 'Create Member',
           busy: busy,
@@ -70,6 +73,7 @@ class _CreateMemberScreenState extends ConsumerState<CreateMemberScreen> {
     String? gender,
     DateTime? dateOfBirth,
     String? notes,
+    String? subscriptionPlanId,
   }) async {
     setState(() => _serverError = null);
 
@@ -101,12 +105,36 @@ class _CreateMemberScreenState extends ConsumerState<CreateMemberScreen> {
             notes: notes,
           );
 
+      // A duration was selected — create the membership for the new member.
+      // The member itself is already saved, so a subscription failure is
+      // reported as a warning instead of blocking navigation.
+      String? subscriptionWarning;
+      if (subscriptionPlanId != null) {
+        try {
+          await ref
+              .read(subscriptionControllerProvider.notifier)
+              .createSubscription(
+                organizationId: organizationId,
+                memberId: member.id,
+                planId: subscriptionPlanId,
+              );
+        } on AppFailure catch (e) {
+          subscriptionWarning =
+              'Member created, but the subscription failed: ${e.message}';
+        } catch (_) {
+          subscriptionWarning =
+              'Member created, but the subscription failed. '
+              'You can add it from the member profile.';
+        }
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Member created successfully. '
-              'ID: ${member.memberCode ?? member.id}',
+              subscriptionWarning ??
+                  'Member created successfully. '
+                      'ID: ${member.memberCode ?? member.id}',
             ),
             behavior: SnackBarBehavior.floating,
           ),
