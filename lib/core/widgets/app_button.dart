@@ -34,8 +34,9 @@ class AppButton extends StatelessWidget {
     final enabled = !busy && onPressed != null;
 
     final foreground = switch (variant) {
-      AppButtonVariant.primary ||
-      AppButtonVariant.danger => colorScheme.onPrimary,
+      AppButtonVariant.primary => colorScheme.onPrimary,
+      // Danger keeps white text regardless of the onPrimary ink color.
+      AppButtonVariant.danger => colorScheme.onError,
       AppButtonVariant.secondary => colorScheme.onSecondaryContainer,
       AppButtonVariant.outline || AppButtonVariant.text => colorScheme.primary,
     };

@@ -50,7 +50,21 @@ class AppScaffold extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(title: Text(title)),
           body: child,
-          bottomNavigationBar: _AppBottomNav(location: location),
+          bottomNavigationBar: DecoratedBox(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  width: 1,
+                ),
+              ),
+            ),
+            child: SafeArea(
+              top: false,
+              child: _AppBottomNav(location: location),
+            ),
+          ),
         );
       },
     );
@@ -85,6 +99,14 @@ class _AppBottomNav extends ConsumerWidget {
       icon: Icons.card_membership_outlined,
       path: RoutePaths.subscriptions,
     ),
+  ];
+
+  /// Filled-style glyph shown on the active destination.
+  static const List<IconData> _activeIcons = [
+    Icons.dashboard_rounded,
+    Icons.login_rounded,
+    Icons.groups_rounded,
+    Icons.card_membership_rounded,
   ];
 
   /// Every nav item that is not pinned to the bar itself.
@@ -133,14 +155,23 @@ class _AppBottomNav extends ConsumerWidget {
         _showMoreSheet(context, ref, secondary);
       },
       destinations: [
-        for (final item in primary)
+        for (final (index, item) in primary.indexed)
           NavigationDestination(
             icon: Icon(item.icon),
-            selectedIcon: Icon(item.icon, color: colorScheme.primary),
+            selectedIcon: Icon(
+              _activeIcons[index],
+              color: colorScheme.primary,
+            ),
+            tooltip: item.label,
             label: item.label,
           ),
-        const NavigationDestination(
-          icon: Icon(Icons.menu_rounded),
+        NavigationDestination(
+          icon: const Icon(Icons.menu_rounded),
+          selectedIcon: Icon(
+            Icons.menu_rounded,
+            color: colorScheme.primary,
+          ),
+          tooltip: 'More',
           label: 'More',
         ),
       ],
