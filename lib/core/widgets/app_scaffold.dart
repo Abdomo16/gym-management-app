@@ -154,67 +154,79 @@ class _AppBottomNav extends ConsumerWidget {
       context: context,
       showDragHandle: true,
       builder: (sheetContext) {
+        // Cap the sheet at 70% of screen height and scroll anything that
+        // does not fit, so many menu items never overflow.
+        final maxSheetHeight = MediaQuery.of(sheetContext).size.height * 0.7;
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.xs,
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'More',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                ),
-              ),
-              for (final item in items)
-                ListTile(
-                  leading: Icon(
-                    item.icon,
-                    color: _matches(item.path)
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                  title: Text(
-                    item.label,
-                    style: TextStyle(
-                      color: _matches(item.path) ? colorScheme.primary : null,
-                      fontWeight:
-                          _matches(item.path) ? FontWeight.w600 : FontWeight.w500,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxSheetHeight),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.xs,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'More',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
                     ),
                   ),
-                  trailing: _matches(item.path)
-                      ? Icon(Icons.chevron_right_rounded,
-                          color: colorScheme.primary)
-                      : null,
-                  onTap: () {
-                    Navigator.of(sheetContext).pop();
-                    context.go(item.path);
-                  },
-                ),
-              const Divider(height: AppSpacing.lg),
-              ListTile(
-                leading: const Icon(
-                  Icons.logout_rounded,
-                  color: AppColors.danger,
-                ),
-                title: Text(
-                  'Sign out',
-                  style: TextStyle(color: AppColors.danger),
-                ),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  ref.read(authControllerProvider.notifier).signOut();
-                },
+                  for (final item in items)
+                    ListTile(
+                      leading: Icon(
+                        item.icon,
+                        color: _matches(item.path)
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                      title: Text(
+                        item.label,
+                        style: TextStyle(
+                          color: _matches(item.path)
+                              ? colorScheme.primary
+                              : null,
+                          fontWeight: _matches(item.path)
+                              ? FontWeight.w600
+                              : FontWeight.w500,
+                        ),
+                      ),
+                      trailing: _matches(item.path)
+                          ? Icon(Icons.chevron_right_rounded,
+                              color: colorScheme.primary)
+                          : null,
+                      onTap: () {
+                        Navigator.of(sheetContext).pop();
+                        context.go(item.path);
+                      },
+                    ),
+                  const Divider(height: AppSpacing.lg),
+                  ListTile(
+                    leading: const Icon(
+                      Icons.logout_rounded,
+                      color: AppColors.danger,
+                    ),
+                    title: Text(
+                      'Sign out',
+                      style: TextStyle(color: AppColors.danger),
+                    ),
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      ref.read(authControllerProvider.notifier).signOut();
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
               ),
-              const SizedBox(height: AppSpacing.sm),
-            ],
+            ),
           ),
         );
       },
