@@ -67,79 +67,246 @@ class _DetailsActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final role = ref.watch(currentProfileProvider)?.role;
-    final canEdit = role != null; // all roles can view; owner/manager/receptionist can create
-    final canChangeStatus = role == UserRole.owner || role == UserRole.manager;
-
-    if (!canEdit) return const SizedBox.shrink();
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Edit button — all authenticated roles
-        IconButton(
-          icon: const Icon(Icons.edit_outlined),
-          tooltip: 'Edit member',
-          onPressed: () =>
-              context.push(RoutePaths.memberEdit(member.id)),
-        ),
-        // Status menu — owner/manager only
-        if (canChangeStatus)
-          _StatusMenuButton(member: member),
-      ],
+    return IconButton(
+      icon: const Icon(Icons.more_vert_rounded),
+      tooltip: 'Member actions',
+      onPressed: () => showMemberActionsSheet(context, ref, member),
     );
   }
 }
 
-class _StatusMenuButton extends ConsumerWidget {
-  const _StatusMenuButton({required this.member});
+/// Bottom-sheet menu with the member's actions: edit, add subscription,
+/// freeze/cancel the current membership, and — for the owner only —
+/// delete the member permanently.
+///
+/// Role checks shape the UI only; Supabase RLS remains the security
+/// boundary for every operation.
+Future<void> showMemberActionsSheet(
+  BuildContext context,
+  WidgetRef ref,
+  Member member,
+) async {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+  final role = ref.read(currentProfileProvider)?.role;
+  final canChangeStatus = role == UserRole.owner || role == UserRole.manager;
+  final canDelete = role == UserRole.owner;
 
-  final Member member;
+  // Current subscription drives whether freeze/cancel apply. Cached by
+  // the provider, so this does not trigger a network round-trip.
+  final subscriptions =
+      ref.read(memberSubscriptionsProvider(member.id)).whenOrNull(
+            data: (list) => list,
+          ) ??
+          const <Subscription>[];
+  final current = subscriptions.isEmpty ? null : subscriptions.first;
+  final canFreeze = canChangeStatus &&
+      current != null &&
+      (current.status == SubscriptionStatus.active ||
+          current.status == SubscriptionStatus.expiring);
+  final canCancel = canChangeStatus &&
+      current != null &&
+      current.status != SubscriptionStatus.cancelled;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(membersControllerProvider.notifier);
-    final busy = ref.watch(membersControllerProvider) == MemberActionStatus.busy;
-
-    return PopupMenuButton<MemberStatus>(
-      icon: const Icon(Icons.more_vert_rounded),
-      tooltip: 'Change status',
-      enabled: !busy,
-      itemBuilder: (_) => MemberStatus.values
-          .where((s) => s != member.status)
-          .map(
-            (s) => PopupMenuItem(
-              value: s,
-              child: Text('Mark as ${s.label}'),
+  await showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit_outlined),
+            title: const Text('Edit member'),
+            onTap: () {
+              Navigator.of(sheetContext).pop();
+              context.push(RoutePaths.memberEdit(member.id));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add_circle_outline_rounded),
+            title: const Text('Add subscription'),
+            onTap: () {
+              Navigator.of(sheetContext).pop();
+              context.push(RoutePaths.memberSubscriptionCreate(member.id));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.ac_unit_outlined),
+            title: const Text('Freeze membership'),
+            enabled: canFreeze,
+            onTap: canFreeze
+                ? () {
+                    Navigator.of(sheetContext).pop();
+                    _confirmFreezeMembership(context, ref, member, current);
+                  }
+                : null,
+          ),
+          ListTile(
+            leading: Icon(
+              Icons.cancel_outlined,
+              color: canCancel ? null : colorScheme.onSurface.withValues(alpha: 0.38),
             ),
-          )
-          .toList(),
-      onSelected: (newStatus) async {
-        try {
-          await controller.updateMemberStatus(
-            id: member.id,
-            status: newStatus,
-          );
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Member marked as ${newStatus.label}.'),
-                behavior: SnackBarBehavior.floating,
+            title: const Text('Cancel membership'),
+            enabled: canCancel,
+            onTap: canCancel
+                ? () {
+                    Navigator.of(sheetContext).pop();
+                    _confirmCancelMembership(context, ref, member, current);
+                  }
+                : null,
+          ),
+          if (canDelete) ...[
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.delete_outline_rounded,
+                  color: colorScheme.error),
+              title: Text(
+                'Delete member',
+                style: TextStyle(color: colorScheme.error),
               ),
-            );
-          }
-        } on AppFailure catch (e) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(e.message),
-                behavior: SnackBarBehavior.floating,
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          }
-        }
-      },
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                _confirmDeleteMember(context, ref, member);
+              },
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
+}
+
+Future<void> _confirmFreezeMembership(
+  BuildContext context,
+  WidgetRef ref,
+  Member member,
+  Subscription subscription,
+) async {
+  final confirmed = await AppDialog.confirm(
+    context: context,
+    title: 'Freeze membership?',
+    message:
+        'Freezing pauses access for this member until the plan period ends '
+        'or the subscription is managed again. Continue?',
+    confirmLabel: 'Freeze',
+  );
+  if (confirmed != true || !context.mounted) return;
+  await _runSubscriptionChange(
+    context,
+    ref,
+    action: () =>
+        ref.read(subscriptionControllerProvider.notifier).freezeSubscription(
+              memberId: member.id,
+              subscriptionId: subscription.id,
+            ),
+    successMessage: 'Membership frozen.',
+  );
+}
+
+Future<void> _confirmCancelMembership(
+  BuildContext context,
+  WidgetRef ref,
+  Member member,
+  Subscription subscription,
+) async {
+  final confirmed = await AppDialog.confirm(
+    context: context,
+    title: 'Cancel membership?',
+    message:
+        'Cancelling ends this subscription immediately. The record stays in '
+        'the member\'s history. Continue?',
+    confirmLabel: 'Cancel',
+    confirmVariant: AppButtonVariant.danger,
+  );
+  if (confirmed != true || !context.mounted) return;
+  await _runSubscriptionChange(
+    context,
+    ref,
+    action: () =>
+        ref.read(subscriptionControllerProvider.notifier).cancelSubscription(
+              memberId: member.id,
+              subscriptionId: subscription.id,
+            ),
+    successMessage: 'Membership cancelled.',
+  );
+}
+
+Future<void> _runSubscriptionChange(
+  BuildContext context,
+  WidgetRef ref, {
+  required Future<Subscription> Function() action,
+  required String successMessage,
+}) async {
+  try {
+    await action();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(successMessage),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  } on AppFailure catch (error) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+}
+
+Future<void> _confirmDeleteMember(
+  BuildContext context,
+  WidgetRef ref,
+  Member member,
+) async {
+  final confirmed = await AppDialog.confirm(
+    context: context,
+    title: 'Delete member?',
+    message:
+        '${member.fullName} and all related records — subscriptions, '
+        'attendance and payments — will be permanently deleted. '
+        'This cannot be undone.',
+    confirmLabel: 'Delete',
+    confirmVariant: AppButtonVariant.danger,
+  );
+  if (confirmed != true || !context.mounted) return;
+
+  try {
+    await ref.read(membersControllerProvider.notifier).deleteMember(
+          id: member.id,
+        );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${member.fullName} was deleted.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    // The member no longer exists — leave the details screen.
+    context.go(RoutePaths.members);
+  } on AppFailure catch (error) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error.message),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
+    );
+  } catch (_) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Something went wrong. Please try again.'),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 }

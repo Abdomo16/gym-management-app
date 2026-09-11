@@ -132,6 +132,17 @@ class SupabaseMembersRepository implements MembersRepository {
   }
 
   @override
+  Future<void> deleteMember(String id) async {
+    try {
+      await _dataSource.deleteMember(id);
+    } on AppFailure {
+      rethrow;
+    } catch (error) {
+      throw ExceptionMapper.map(error);
+    }
+  }
+
+  @override
   Future<List<BranchSummary>> getOrganizationBranches(
     String organizationId,
   ) async {

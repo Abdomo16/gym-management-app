@@ -1,24 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import 'package:gym_management_app/app/router/app_routes.dart';
 import 'package:gym_management_app/app/theme/app_spacing.dart';
+import 'package:gym_management_app/core/errors/app_failure.dart';
+import 'package:gym_management_app/core/widgets/app_button.dart';
 import 'package:gym_management_app/core/widgets/app_card.dart';
 import 'package:gym_management_app/core/widgets/app_empty_state.dart';
 import 'package:gym_management_app/core/widgets/app_error_state.dart';
 import 'package:gym_management_app/core/widgets/app_loading.dart';
+import 'package:gym_management_app/features/auth/domain/entities/user_profile.dart';
+import 'package:gym_management_app/features/auth/presentation/providers/auth_state_provider.dart';
 import 'package:gym_management_app/features/subscriptions/domain/entities/subscription_plan.dart';
+import 'package:gym_management_app/features/subscriptions/presentation/providers/subscription_plan_controller.dart';
 import 'package:gym_management_app/features/subscriptions/presentation/providers/subscription_plans_provider.dart';
 
 /// Subscriptions overview: the sellable plans of the current organization.
 ///
-/// Plans drive both member signup (duration picker) and renewals; the
-/// database remains the source of truth for durations and prices.
+/// Plans drive both member signup and renewals; the database remains the
+/// source of truth for durations and prices. Owners and managers can add
+/// and delete plans; the database's RLS policy is the security boundary.
 class SubscriptionsScreen extends ConsumerWidget {
   const SubscriptionsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final plansAsync = ref.watch(subscriptionPlansProvider);
+    final canManage = _canManage(ref);
 
     return RefreshIndicator(
       onRefresh: () async => ref.invalidate(subscriptionPlansProvider),
@@ -29,49 +38,126 @@ class SubscriptionsScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(subscriptionPlansProvider),
         ),
         data: (plans) {
-          if (plans.isEmpty) {
-            return ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: AppCard(
-                    child: AppEmptyState(
-                      title: 'No plans yet',
-                      message:
-                          'Subscription plans appear here once they are '
-                          'added for your gym.',
-                      icon: Icons.card_membership_outlined,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }
-
           final sorted = [...plans]..sort(
             (a, b) => (a.durationDays ?? 0).compareTo(b.durationDays ?? 0),
           );
-
-          return ListView.separated(
+          return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(AppSpacing.lg),
-            itemCount: sorted.length,
-            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (context, index) => _PlanCard(
-              plan: sorted[index],
-            ),
+            children: [
+              if (canManage) ...[
+                AppButton(
+                  label: 'Add plan',
+                  icon: Icons.add_rounded,
+                  onPressed: () =>
+                      context.push(RoutePaths.subscriptionPlanCreate),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+              ],
+              if (sorted.isEmpty)
+                AppCard(
+                  child: AppEmptyState(
+                    title: 'No plans yet',
+                    message: canManage
+                        ? 'Create your first plan to sell memberships with '
+                              'a duration and price.'
+                        : 'Subscription plans appear here once the gym '
+                              'owner adds them.',
+                    icon: Icons.card_membership_outlined,
+                  ),
+                )
+              else
+                for (final plan in sorted) ...[
+                  _PlanCard(
+                    plan: plan,
+                    canManage: canManage,
+                    onDelete: () => _confirmDelete(context, ref, plan),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+            ],
           );
         },
       ),
     );
   }
+
+  /// UI-level gate only; the database's RLS write policy is the real
+  /// security boundary for plan mutations.
+  static bool _canManage(WidgetRef ref) {
+    final role = ref.watch(currentProfileProvider)?.role;
+    return role == UserRole.owner || role == UserRole.manager;
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    SubscriptionPlan plan,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete plan?'),
+        content: Text(
+          '"${plan.name}" will no longer be offered to members. Existing '
+          'subscriptions keep their original terms.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref.read(planControllerProvider.notifier).deactivatePlan(plan.id);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Plan "${plan.name}" deleted.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } on AppFailure catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Something went wrong. Please try again.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 }
 
 class _PlanCard extends StatelessWidget {
-  const _PlanCard({required this.plan});
+  const _PlanCard({
+    required this.plan,
+    required this.canManage,
+    required this.onDelete,
+  });
 
   final SubscriptionPlan plan;
+  final bool canManage;
+  final VoidCallback onDelete;
 
   /// "1 month", "2 months", ... "1 year" for month-based plans; falls back
   /// to the plan's own duration label otherwise.
@@ -146,6 +232,18 @@ class _PlanCard extends StatelessWidget {
                   : colorScheme.onSurfaceVariant,
             ),
           ),
+          if (canManage) ...[
+            const SizedBox(width: AppSpacing.xs),
+            IconButton(
+              tooltip: 'Delete plan',
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                size: 20,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              onPressed: onDelete,
+            ),
+          ],
         ],
       ),
     );

@@ -222,6 +222,52 @@ void main() {
       );
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // deleteMember
+  // ---------------------------------------------------------------------------
+  group('MembersController.deleteMember', () {
+    test('removes the member from the repository', () async {
+      final repo = FakeMembersRepository(members: [testMember]);
+      final container = makeContainer(repo);
+
+      await container
+          .read(membersControllerProvider.notifier)
+          .deleteMember(id: 'member-1');
+
+      expect(repo.storedMembers, isEmpty);
+    });
+
+    test('state returns to idle after successful deleteMember', () async {
+      final container = makeContainer(
+        FakeMembersRepository(members: [testMember]),
+      );
+      await container
+          .read(membersControllerProvider.notifier)
+          .deleteMember(id: 'member-1');
+      expect(
+        container.read(membersControllerProvider),
+        MemberActionStatus.idle,
+      );
+    });
+
+    test('state returns to idle and failure is rethrown after delete fails',
+        () async {
+      final container = makeContainer(
+        FakeMembersRepository(throwOnDelete: true),
+      );
+      await expectLater(
+        container.read(membersControllerProvider.notifier).deleteMember(
+          id: 'member-1',
+        ),
+        throwsA(isA<SupabaseFailure>()),
+      );
+      expect(
+        container.read(membersControllerProvider),
+        MemberActionStatus.idle,
+      );
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------

@@ -12,11 +12,16 @@ class FakeMembersRepository implements MembersRepository {
     List<Member> members = const [],
     this.throwDuplicatePhone = false,
     this.throwOnGet = false,
+    this.throwOnDelete = false,
   }) : _members = List<Member>.from(members);
 
   final List<Member> _members;
   bool throwDuplicatePhone;
   bool throwOnGet;
+  bool throwOnDelete;
+
+  /// Read-only view of the stored members for test assertions.
+  List<Member> get storedMembers => List.unmodifiable(_members);
 
   // ---------------------------------------------------------------------------
   // Factory helpers
@@ -146,6 +151,16 @@ class FakeMembersRepository implements MembersRepository {
       _members[index] = updated;
     }
     return updated;
+  }
+
+  @override
+  Future<void> deleteMember(String id) async {
+    if (throwOnDelete) {
+      throw const SupabaseFailure(
+        message: 'Only the gym owner or a manager can delete members.',
+      );
+    }
+    _members.removeWhere((m) => m.id == id);
   }
 
   @override

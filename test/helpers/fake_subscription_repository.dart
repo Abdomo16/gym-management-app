@@ -17,6 +17,7 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
     this.throwOnHistory = false,
     this.throwOnCreate = false,
     this.throwOnUpdate = false,
+    this.throwOnPlanWrite = false,
   }) : _plans = List<SubscriptionPlan>.from(plans),
        _subscriptions = List<Subscription>.from(subscriptions);
 
@@ -26,6 +27,10 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
   bool throwOnHistory;
   bool throwOnCreate;
   bool throwOnUpdate;
+  bool throwOnPlanWrite;
+
+  /// Read-only view of the stored plans for test assertions.
+  List<SubscriptionPlan> get storedPlans => List.unmodifiable(_plans);
 
   // ---------------------------------------------------------------------------
   // Factory helpers
@@ -86,6 +91,40 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
       throw const SupabaseFailure(message: 'Failed to load plans.');
     }
     return _plans.where((p) => !activeOnly || p.isActive).toList();
+  }
+
+  @override
+  Future<SubscriptionPlan> createPlan({
+    required String organizationId,
+    required String name,
+    required int durationDays,
+    required double price,
+    String? description,
+  }) async {
+    if (throwOnPlanWrite) {
+      throw const SupabaseFailure(message: 'Simulated plan write error.');
+    }
+    final plan = makeTestPlan(
+      id: 'plan-${_plans.length + 1}',
+      organizationId: organizationId,
+      name: name,
+      description: description,
+      durationDays: durationDays,
+      price: price,
+    );
+    _plans.add(plan);
+    return plan;
+  }
+
+  @override
+  Future<void> deactivatePlan(String planId) async {
+    if (throwOnPlanWrite) {
+      throw const SupabaseFailure(message: 'Simulated plan write error.');
+    }
+    final index = _plans.indexWhere((p) => p.id == planId);
+    if (index >= 0) {
+      _plans[index] = _plans[index].copyWith(isActive: false);
+    }
   }
 
   @override

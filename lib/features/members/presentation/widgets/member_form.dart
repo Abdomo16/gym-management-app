@@ -288,8 +288,9 @@ class _MemberFormState extends ConsumerState<MemberForm> {
   }
 }
 
-/// Subscription-duration picker shown when creating a member. Each option
-/// is a plan; the plan's duration drives the membership end date.
+/// Subscription-plan picker shown when creating a member. Plans come from
+/// the gym's Subscriptions catalog; the plan's duration drives the
+/// membership end date and its price is charged.
 class _DurationDropdown extends StatelessWidget {
   const _DurationDropdown({
     required this.plans,
@@ -315,11 +316,12 @@ class _DurationDropdown extends StatelessWidget {
   }
 
   static String _optionLabel(SubscriptionPlan plan) {
+    final parts = <String>[plan.name, _durationLabel(plan)];
     final price = plan.price;
-    if (price == null || price <= 0) {
-      return _durationLabel(plan);
+    if (price != null && price > 0 && plan.priceLabel != null) {
+      parts.add(plan.priceLabel!);
     }
-    return '${_durationLabel(plan)} — ${plan.priceLabel}';
+    return parts.join(' — ');
   }
 
   @override
@@ -328,8 +330,8 @@ class _DurationDropdown extends StatelessWidget {
       return DropdownButtonFormField<String>(
         initialValue: null,
         decoration: const InputDecoration(
-          labelText: 'Subscription',
-          helperText: 'No plans available yet.',
+          labelText: 'Subscription plan',
+          helperText: 'No plans yet — create one in the Subscriptions tab.',
         ),
         items: const [
           DropdownMenuItem(value: null, child: Text('No subscription')),
@@ -340,8 +342,8 @@ class _DurationDropdown extends StatelessWidget {
     return DropdownButtonFormField<String>(
       initialValue: value,
       decoration: const InputDecoration(
-        labelText: 'Subscription duration',
-        helperText: 'A subscription is created with the selected duration.',
+        labelText: 'Subscription plan',
+        helperText: 'A subscription is created from the selected plan.',
       ),
       items: [
         const DropdownMenuItem(value: null, child: Text('No subscription')),
