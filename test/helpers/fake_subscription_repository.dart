@@ -29,6 +29,9 @@ class FakeSubscriptionRepository implements SubscriptionRepository {
   bool throwOnUpdate;
   bool throwOnPlanWrite;
 
+  /// Read-only view of the stored plans for test assertions.
+  List<SubscriptionPlan> get storedPlans => List.unmodifiable(_plans);
+
   // ---------------------------------------------------------------------------
   // Factory helpers
   // ---------------------------------------------------------------------------
