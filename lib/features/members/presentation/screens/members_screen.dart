@@ -103,17 +103,35 @@ class MembersScreen extends ConsumerWidget {
                   onAdd: () => context.push(RoutePaths.membersCreate),
                 );
         }
+        // Only the unfiltered list paginates; search results stay bounded.
+        final loadMoreStatus = ref.watch(membersListLoadMoreProvider);
+        final showFooter = !isSearching &&
+            (loadMoreStatus == MembersLoadMoreStatus.loading ||
+                loadMoreStatus == MembersLoadMoreStatus.error);
         return RefreshIndicator(
           onRefresh: () => ref.read(membersListProvider.notifier).refresh(),
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-            itemCount: members.length,
+            itemCount: members.length + (showFooter ? 1 : 0),
             separatorBuilder: (context, index) => Divider(
               height: 1,
               indent: AppSpacing.md,
               endIndent: AppSpacing.md,
             ),
             itemBuilder: (context, index) {
+              if (index >= members.length) {
+                return _LoadMoreFooter(
+                  status: loadMoreStatus,
+                  onRetry: () =>
+                      ref.read(membersListProvider.notifier).loadMore(),
+                );
+              }
+              // Near the bottom of the unfiltered list, queue the next page.
+              if (!isSearching && index >= members.length - 10) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ref.read(membersListProvider.notifier).loadMore();
+                });
+              }
               final member = members[index];
               return MemberListItem(
                 member: member,
@@ -124,6 +142,43 @@ class MembersScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+/// Bottom-of-list pagination footer: a spinner while the next page loads
+/// or a retry row when loading it failed.
+class _LoadMoreFooter extends StatelessWidget {
+  const _LoadMoreFooter({required this.status, required this.onRetry});
+
+  final MembersLoadMoreStatus status;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      child: Center(
+        child: status == MembersLoadMoreStatus.error
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Could not load more members.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  TextButton(onPressed: onRetry, child: const Text('Retry')),
+                ],
+              )
+            : const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              ),
+      ),
     );
   }
 }

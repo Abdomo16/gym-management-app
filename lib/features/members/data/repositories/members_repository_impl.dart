@@ -18,9 +18,9 @@ class SupabaseMembersRepository implements MembersRepository {
   final MembersRemoteDataSource _dataSource;
 
   @override
-  Future<List<Member>> getMembers({int limit = 50}) async {
+  Future<List<Member>> getMembers({int limit = 50, int offset = 0}) async {
     try {
-      final rows = await _dataSource.getMembers(limit: limit);
+      final rows = await _dataSource.getMembers(limit: limit, offset: offset);
       return rows.map(MemberMapper.fromMap).toList();
     } on AppFailure {
       rethrow;
