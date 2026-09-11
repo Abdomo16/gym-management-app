@@ -5,6 +5,17 @@ abstract final class OrganizationCalendar {
     return DateTime(local.year, local.month, local.day);
   }
 
+  /// Last day covered by a period starting [start] that lasts
+  /// [durationDays], inclusive of the start day: a 30-day plan starting on
+  /// the 1st ends on the 30th.
+  ///
+  /// The single source of truth for subscription end dates — used by the
+  /// subscription datasource when persisting and by the form when
+  /// previewing, so the two can never drift apart.
+  static DateTime subscriptionEndDate(DateTime start, int durationDays) {
+    return start.add(Duration(days: durationDays - 1));
+  }
+
   static Duration _offsetFor(String timezone, DateTime utc) {
     return switch (timezone) {
       'Africa/Cairo' => Duration(hours: _isCairoDaylightTime(utc) ? 3 : 2),

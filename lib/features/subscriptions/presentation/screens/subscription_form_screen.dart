@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:gym_management_app/app/theme/app_spacing.dart';
 import 'package:gym_management_app/core/errors/app_failure.dart';
+import 'package:gym_management_app/core/utils/organization_calendar.dart';
 import 'package:gym_management_app/core/widgets/app_button.dart';
 import 'package:gym_management_app/core/widgets/app_loading.dart';
 import 'package:gym_management_app/features/auth/presentation/providers/auth_state_provider.dart';
@@ -57,9 +58,9 @@ class _SubscriptionFormScreenState
     if (plan == null || days == null) {
       return null;
     }
-    // Calendar-day math (mirrors the database's date arithmetic) so the
-    // preview is not skewed by DST transitions.
-    return DateTime(_startDate.year, _startDate.month, _startDate.day + days);
+    // Same inclusive computation the datasource persists, so the preview
+    // always matches the stored end date exactly.
+    return OrganizationCalendar.subscriptionEndDate(_startDate, days);
   }
 
   SubscriptionPlan? get _selectedPlan {

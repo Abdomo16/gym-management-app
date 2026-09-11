@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:gym_management_app/core/errors/app_failure.dart';
+import 'package:gym_management_app/core/utils/organization_calendar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Data access for `public.subscriptions` and `public.subscription_plans`.
@@ -18,14 +19,14 @@ class SubscriptionsRemoteDataSource {
   static const String _plansTable = 'subscription_plans';
 
   /// Derives the last covered day from the start date and the plan's
-  /// duration in days, inclusive of the start day: a 30-day plan starting
-  /// on the 1st ends on the 30th.
+  /// duration in days. Delegates to [OrganizationCalendar.subscriptionEndDate],
+  /// the single source of truth shared with the form's end-date preview.
   @visibleForTesting
   static DateTime computeSubscriptionEndDate(
     DateTime start,
     int durationDays,
   ) {
-    return start.add(Duration(days: durationDays - 1));
+    return OrganizationCalendar.subscriptionEndDate(start, durationDays);
   }
 
   /// Loads subscription plans for the current organization.
@@ -79,7 +80,7 @@ class SubscriptionsRemoteDataSource {
         );
       }
       final effectiveStart = startDate ?? DateTime.now();
-      final effectiveEnd = computeSubscriptionEndDate(
+      final effectiveEnd = OrganizationCalendar.subscriptionEndDate(
         effectiveStart,
         planDurationDays,
       );
