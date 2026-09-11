@@ -7,6 +7,7 @@ import 'package:gym_management_app/core/utils/validators.dart';
 import 'package:gym_management_app/core/widgets/app_button.dart';
 import 'package:gym_management_app/core/widgets/app_text_field.dart';
 import 'package:gym_management_app/features/auth/presentation/providers/auth_state_provider.dart';
+import 'package:gym_management_app/features/subscriptions/domain/entities/subscription_plan.dart';
 import 'package:gym_management_app/features/subscriptions/presentation/providers/subscription_plan_controller.dart';
 
 /// Owner/manager form to create a subscription plan with a price.
@@ -44,12 +45,6 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
     _nameController.dispose();
     _priceController.dispose();
     super.dispose();
-  }
-
-  String _durationLabel(int months) {
-    if (months == 1) return '1 month';
-    if (months == 12) return '1 year';
-    return '$months months';
   }
 
   /// Parses the price field: accepts "300" or "300.50" (also with a
@@ -96,7 +91,7 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
         SnackBar(
           content: Text(
             'Plan created: ${_nameController.text.trim()} — '
-            '${_durationLabel(_durationMonths)}.',
+            '${SubscriptionPlan.monthsLabel(_durationMonths)}.',
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -138,7 +133,7 @@ class _PlanFormScreenState extends ConsumerState<PlanFormScreen> {
                   for (var months = 1; months <= _maxDurationMonths; months++)
                     DropdownMenuItem(
                       value: months,
-                      child: Text(_durationLabel(months)),
+                      child: Text(SubscriptionPlan.monthsLabel(months)),
                     ),
                 ],
                 onChanged: busy

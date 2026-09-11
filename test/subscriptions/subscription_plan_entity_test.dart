@@ -29,6 +29,16 @@ void main() {
       expect(makePlan(durationDays: 90).durationLabel, '3 months');
     });
 
+    test('360 days renders as "1 year"', () {
+      expect(makePlan(durationDays: 360).durationLabel, '1 year');
+    });
+
+    test('monthsLabel formats the duration picker labels', () {
+      expect(SubscriptionPlan.monthsLabel(1), '1 month');
+      expect(SubscriptionPlan.monthsLabel(6), '6 months');
+      expect(SubscriptionPlan.monthsLabel(12), '1 year');
+    });
+
     test('7 days renders as "1 week"', () {
       expect(makePlan(durationDays: 7).durationLabel, '1 week');
     });

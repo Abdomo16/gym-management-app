@@ -302,21 +302,8 @@ class _DurationDropdown extends StatelessWidget {
   final String? value;
   final ValueChanged<String?>? onChanged;
 
-  /// "1 month", "2 months", ... "1 year" for month-based plans; falls back
-  /// to the plan's own duration label otherwise.
-  static String _durationLabel(SubscriptionPlan plan) {
-    final days = plan.durationDays;
-    if (days != null && days > 0 && days % 30 == 0) {
-      final months = days ~/ 30;
-      if (months == 1) return '1 month';
-      if (months == 12) return '1 year';
-      return '$months months';
-    }
-    return plan.durationLabel;
-  }
-
   static String _optionLabel(SubscriptionPlan plan) {
-    final parts = <String>[plan.name, _durationLabel(plan)];
+    final parts = <String>[plan.name, plan.durationLabel];
     final price = plan.price;
     if (price != null && price > 0 && plan.priceLabel != null) {
       parts.add(plan.priceLabel!);
