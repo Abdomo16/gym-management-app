@@ -56,6 +56,11 @@ abstract interface class MembersRepository {
     required MemberStatus status,
   });
 
+  /// Permanently deletes a member and all related records (subscriptions,
+  /// attendance, payments, notifications cascade server-side). The
+  /// database's RLS delete policy (owner/manager) is the security boundary.
+  Future<void> deleteMember(String id);
+
   /// Branches belonging to the current organization, for branch assignment.
   Future<List<BranchSummary>> getOrganizationBranches(String organizationId);
 }

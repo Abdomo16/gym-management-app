@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:gym_management_app/features/members/domain/entities/member.dart';
 import 'package:gym_management_app/features/members/domain/usecases/create_member.dart';
+import 'package:gym_management_app/features/members/domain/usecases/delete_member.dart';
 import 'package:gym_management_app/features/members/domain/usecases/update_member.dart';
 import 'package:gym_management_app/features/members/domain/usecases/update_member_status.dart';
 import 'package:gym_management_app/features/members/presentation/providers/member_details_provider.dart';
@@ -74,6 +75,19 @@ class MembersController extends Notifier<MemberActionStatus> {
         status: status,
       ),
     );
+  }
+
+  /// Deletes the member permanently. Cascades to the member's
+  /// subscriptions, attendance, payments and notifications server-side.
+  Future<void> deleteMember({required String id}) async {
+    state = MemberActionStatus.busy;
+    try {
+      await DeleteMember(ref.read(membersRepositoryProvider))(id);
+      ref.invalidate(membersListProvider);
+      ref.invalidate(memberSearchProvider);
+    } finally {
+      state = MemberActionStatus.idle;
+    }
   }
 
   /// Runs [action] under the busy flag, refreshing the affected providers

@@ -141,6 +141,27 @@ class MembersRemoteDataSource {
     }
   }
 
+  /// Permanently deletes a member. Subscriptions, attendance, payments and
+  /// notifications cascade server-side. The database's `members_delete`
+  /// RLS policy (owner/manager of the current organization) is the
+  /// security boundary.
+  Future<void> deleteMember(String id) async {
+    try {
+      await _client.from(_membersTable).delete().eq('id', id);
+    } on PostgrestException catch (error) {
+      if (error.code == '42501') {
+        throw const SupabaseFailure(
+          message: 'Only the gym owner or a manager can delete members.',
+        );
+      }
+      throw SupabaseFailure(
+        message: 'Unable to delete the member. Please try again.',
+        code: error.code,
+        cause: error,
+      );
+    }
+  }
+
   /// Branches belonging to the authenticated organization.
   Future<List<BranchSummary>> getOrganizationBranches(
     String organizationId,
