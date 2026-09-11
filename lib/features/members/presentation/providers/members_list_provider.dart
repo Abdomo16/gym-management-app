@@ -7,27 +7,42 @@ import 'package:gym_management_app/features/members/presentation/providers/membe
 /// State of the "load more" flow at the bottom of the member list.
 enum MembersLoadMoreStatus { idle, loading, error, exhausted }
 
+/// One snapshot of the member list: the members loaded so far plus the
+/// state of pagination at the bottom of that list.
+class MembersListPage {
+  const MembersListPage({
+    required this.members,
+    this.loadMoreStatus = MembersLoadMoreStatus.idle,
+  });
+
+  final List<Member> members;
+  final MembersLoadMoreStatus loadMoreStatus;
+
+  bool get hasMore => loadMoreStatus != MembersLoadMoreStatus.exhausted;
+}
+
 /// Drives the member list page.
 ///
 /// Exposes the standard async states (loading / data / empty / error), a
 /// [refresh] action, and [loadMore] pagination: pages are appended as the
 /// user scrolls until a shorter-than-page-size page signals the end.
-class MembersListController extends AsyncNotifier<List<Member>> {
+class MembersListController extends AsyncNotifier<MembersListPage> {
   static const int pageSize = 50;
 
-  bool _hasMore = false;
   bool _isLoadingMore = false;
 
   @override
-  Future<List<Member>> build() async {
-    ref.read(membersListLoadMoreProvider.notifier).update(
-          MembersLoadMoreStatus.idle,
-        );
+  Future<MembersListPage> build() async {
     final page = await GetMembers(ref.read(membersRepositoryProvider))(
       limit: pageSize,
     );
-    _hasMore = page.length == pageSize;
-    return page;
+    final hasMore = page.length == pageSize;
+    return MembersListPage(
+      members: page,
+      loadMoreStatus: hasMore
+          ? MembersLoadMoreStatus.idle
+          : MembersLoadMoreStatus.exhausted,
+    );
   }
 
   Future<void> refresh() async {
@@ -38,24 +53,37 @@ class MembersListController extends AsyncNotifier<List<Member>> {
   /// Appends the next page to the current list. No-op while a page is
   /// already in flight or the end of the list has been reached.
   Future<void> loadMore() async {
-    if (_isLoadingMore || !_hasMore) return;
+    final current = state.value;
+    if (_isLoadingMore || current == null || !current.hasMore) return;
     _isLoadingMore = true;
-    final loadMoreState = ref.read(membersListLoadMoreProvider.notifier);
-    loadMoreState.update(MembersLoadMoreStatus.loading);
+    state = AsyncData(
+      MembersListPage(
+        members: current.members,
+        loadMoreStatus: MembersLoadMoreStatus.loading,
+      ),
+    );
     try {
-      final current = state.value ?? const <Member>[];
       final next = await GetMembers(ref.read(membersRepositoryProvider))(
         limit: pageSize,
-        offset: current.length,
+        offset: current.members.length,
       );
-      _hasMore = next.length == pageSize;
-      loadMoreState.update(
-        _hasMore ? MembersLoadMoreStatus.idle : MembersLoadMoreStatus.exhausted,
+      final hasMore = next.length == pageSize;
+      state = AsyncData(
+        MembersListPage(
+          members: [...current.members, ...next],
+          loadMoreStatus: hasMore
+              ? MembersLoadMoreStatus.idle
+              : MembersLoadMoreStatus.exhausted,
+        ),
       );
-      state = AsyncData([...current, ...next]);
     } catch (_) {
       // Keep the already-loaded list visible; the footer offers a retry.
-      loadMoreState.update(MembersLoadMoreStatus.error);
+      state = AsyncData(
+        MembersListPage(
+          members: current.members,
+          loadMoreStatus: MembersLoadMoreStatus.error,
+        ),
+      );
     } finally {
       _isLoadingMore = false;
     }
@@ -64,20 +92,6 @@ class MembersListController extends AsyncNotifier<List<Member>> {
 
 /// The member list for the current organization.
 final membersListProvider =
-    AsyncNotifierProvider<MembersListController, List<Member>>(
+    AsyncNotifierProvider<MembersListController, MembersListPage>(
       MembersListController.new,
-    );
-
-/// Holds the bottom-of-list pagination state for the members screen.
-class MembersLoadMoreController extends Notifier<MembersLoadMoreStatus> {
-  @override
-  MembersLoadMoreStatus build() => MembersLoadMoreStatus.idle;
-
-  void update(MembersLoadMoreStatus status) => state = status;
-}
-
-/// Tracks the bottom-of-list pagination state for the members screen.
-final membersListLoadMoreProvider =
-    NotifierProvider<MembersLoadMoreController, MembersLoadMoreStatus>(
-      MembersLoadMoreController.new,
     );

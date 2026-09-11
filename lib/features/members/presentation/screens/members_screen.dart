@@ -79,71 +79,99 @@ class MembersScreen extends ConsumerWidget {
   Widget _buildContent(
     BuildContext context,
     WidgetRef ref, {
-    required AsyncValue<List<Member>> listAsync,
+    required AsyncValue<MembersListPage> listAsync,
     required AsyncValue<List<Member>> searchAsync,
     required bool isSearching,
     required VoidCallback onRetry,
   }) {
-    // While the user is typing, show search results (or loading/error states)
-    final activeAsync = isSearching ? searchAsync : listAsync;
-
-    return activeAsync.when(
-      loading: () => const AppLoading(),
-      error: (error, _) => AppErrorState(
-        message: error is Exception
-            ? error.toString().replaceFirst('Exception: ', '')
-            : 'Something went wrong. Please try again.',
-        onRetry: onRetry,
-      ),
-      data: (members) {
-        if (members.isEmpty) {
-          return isSearching
-              ? MemberEmptyState.noSearchResults()
-              : MemberEmptyState.noMembers(
-                  onAdd: () => context.push(RoutePaths.membersCreate),
+    Widget listContent() {
+      return listAsync.when(
+        loading: () => const AppLoading(),
+        error: (error, _) =>
+            AppErrorState(message: _errorMessage(error), onRetry: onRetry),
+        data: (page) {
+          final members = page.members;
+          if (members.isEmpty) {
+            return MemberEmptyState.noMembers(
+              onAdd: () => context.push(RoutePaths.membersCreate),
+            );
+          }
+          final loadMoreStatus = page.loadMoreStatus;
+          final showFooter =
+              loadMoreStatus == MembersLoadMoreStatus.loading ||
+              loadMoreStatus == MembersLoadMoreStatus.error;
+          return RefreshIndicator(
+            onRefresh: () => ref.read(membersListProvider.notifier).refresh(),
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              itemCount: members.length + (showFooter ? 1 : 0),
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                indent: AppSpacing.md,
+                endIndent: AppSpacing.md,
+              ),
+              itemBuilder: (context, index) {
+                if (index >= members.length) {
+                  return _LoadMoreFooter(
+                    status: loadMoreStatus,
+                    onRetry: () =>
+                        ref.read(membersListProvider.notifier).loadMore(),
+                  );
+                }
+                // Near the bottom of the list, queue the next page.
+                if (index >= members.length - 10) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ref.read(membersListProvider.notifier).loadMore();
+                  });
+                }
+                final member = members[index];
+                return MemberListItem(
+                  member: member,
+                  onTap: () => context.push(RoutePaths.memberDetail(member.id)),
                 );
-        }
-        // Only the unfiltered list paginates; search results stay bounded.
-        final loadMoreStatus = ref.watch(membersListLoadMoreProvider);
-        final showFooter = !isSearching &&
-            (loadMoreStatus == MembersLoadMoreStatus.loading ||
-                loadMoreStatus == MembersLoadMoreStatus.error);
-        return RefreshIndicator(
-          onRefresh: () => ref.read(membersListProvider.notifier).refresh(),
-          child: ListView.separated(
+              },
+            ),
+          );
+        },
+      );
+    }
+
+    Widget searchContent() {
+      return searchAsync.when(
+        loading: () => const AppLoading(),
+        error: (error, _) =>
+            AppErrorState(message: _errorMessage(error), onRetry: onRetry),
+        data: (members) {
+          if (members.isEmpty) {
+            return MemberEmptyState.noSearchResults();
+          }
+          return ListView.separated(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-            itemCount: members.length + (showFooter ? 1 : 0),
+            itemCount: members.length,
             separatorBuilder: (context, index) => Divider(
               height: 1,
               indent: AppSpacing.md,
               endIndent: AppSpacing.md,
             ),
             itemBuilder: (context, index) {
-              if (index >= members.length) {
-                return _LoadMoreFooter(
-                  status: loadMoreStatus,
-                  onRetry: () =>
-                      ref.read(membersListProvider.notifier).loadMore(),
-                );
-              }
-              // Near the bottom of the unfiltered list, queue the next page.
-              if (!isSearching && index >= members.length - 10) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ref.read(membersListProvider.notifier).loadMore();
-                });
-              }
               final member = members[index];
               return MemberListItem(
                 member: member,
-                onTap: () =>
-                    context.push(RoutePaths.memberDetail(member.id)),
+                onTap: () => context.push(RoutePaths.memberDetail(member.id)),
               );
             },
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
+
+    // While the user is typing, show search results over the full list.
+    return isSearching ? searchContent() : listContent();
   }
+
+  static String _errorMessage(Object error) => error is Exception
+      ? error.toString().replaceFirst('Exception: ', '')
+      : 'Something went wrong. Please try again.';
 }
 
 /// Bottom-of-list pagination footer: a spinner while the next page loads
