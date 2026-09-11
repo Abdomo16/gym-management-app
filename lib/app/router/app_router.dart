@@ -151,16 +151,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                 EditEmployeeScreen(employeeId: state.pathParameters['id']!),
           ),
           GoRoute(
-            path: RoutePaths.reports,
-            builder: (context, state) =>
-                const AppPlaceholderScreen(featureName: 'Reports'),
-          ),
-          GoRoute(
-            path: RoutePaths.notifications,
-            builder: (context, state) =>
-                const AppPlaceholderScreen(featureName: 'Notifications'),
-          ),
-          GoRoute(
             path: RoutePaths.branches,
             builder: (context, state) =>
                 const AppPlaceholderScreen(featureName: 'Branches'),
