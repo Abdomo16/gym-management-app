@@ -69,11 +69,11 @@ class DashboardRemoteDataSource {
         _countTodayCheckIns(businessDateString),
       ]);
 
-      final recentCheckIns = await _getRecentCheckIns(businessDateString);
-      final expiringSubscriptions = await _getExpiringSubscriptions(
-        businessDateString,
-        expirationDateString,
-      );
+      // List payloads load in parallel; each is already bounded (limit 10).
+      final lists = await Future.wait<List<Map<String, dynamic>>>([
+        _getRecentCheckIns(businessDateString),
+        _getExpiringSubscriptions(businessDateString, expirationDateString),
+      ]);
 
       return DashboardRemoteData(
         summary: {
@@ -85,8 +85,8 @@ class DashboardRemoteDataSource {
           'today_check_ins': counts[5],
         },
         businessDate: businessDate,
-        recentCheckIns: recentCheckIns,
-        expiringSubscriptions: expiringSubscriptions,
+        recentCheckIns: lists[0],
+        expiringSubscriptions: lists[1],
       );
     } on PostgrestException catch (error) {
       throw SupabaseFailure(
@@ -124,18 +124,23 @@ class DashboardRemoteDataSource {
   }
 
   Future<int> _countExpiredSubscriptions(String businessDate) async {
-    final storedExpired = await _count(
-      _client.from(_subscriptionsTable).select('id').eq('status', 'expired'),
-    );
-    final elapsedActive = await _count(
-      _client
-          .from(_subscriptionsTable)
-          .select('id')
-          .inFilter('status', ['active', 'expiring'])
-          .lte('start_date', businessDate)
-          .lte('end_date', businessDate),
-    );
-    return storedExpired + elapsedActive;
+    // Both buckets in parallel: rows stored as expired, plus rows still
+    // marked active/expiring whose period has already elapsed (the status
+    // column is only recomputed on write).
+    final results = await Future.wait<int>([
+      _count(
+        _client.from(_subscriptionsTable).select('id').eq('status', 'expired'),
+      ),
+      _count(
+        _client
+            .from(_subscriptionsTable)
+            .select('id')
+            .inFilter('status', ['active', 'expiring'])
+            .lte('start_date', businessDate)
+            .lte('end_date', businessDate),
+      ),
+    ]);
+    return results[0] + results[1];
   }
 
   Future<int> _countMembers() {
