@@ -26,6 +26,7 @@ import 'package:gym_management_app/features/members/presentation/screens/edit_me
 import 'package:gym_management_app/features/members/presentation/screens/member_details_screen.dart';
 import 'package:gym_management_app/features/members/presentation/screens/members_screen.dart';
 import 'package:gym_management_app/features/settings/presentation/screens/settings_screen.dart';
+import 'package:gym_management_app/features/subscriptions/presentation/screens/plan_form_screen.dart';
 import 'package:gym_management_app/features/subscriptions/presentation/screens/subscription_form_screen.dart';
 import 'package:gym_management_app/features/subscriptions/presentation/screens/subscriptions_screen.dart';
 
@@ -73,6 +74,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.invitationAccept,
         builder: (context, state) => const InvitationAcceptScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.subscriptionPlanCreate,
+        builder: (context, state) => const PlanFormScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppScaffold(child: child),

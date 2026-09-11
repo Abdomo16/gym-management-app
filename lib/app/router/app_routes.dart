@@ -15,6 +15,7 @@ abstract final class RoutePaths {
   static const String checkIn = '/check-in';
   static const String attendance = '/attendance';
   static const String subscriptions = '/subscriptions';
+  static const String subscriptionPlanCreate = '/subscriptions/plans/new';
   static const String payments = '/payments';
   static const String employees = '/admin/employees';
   static const String reports = '/reports';
